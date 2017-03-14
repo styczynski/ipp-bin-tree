@@ -16,12 +16,14 @@ SOURCES_MADE_NUMBER := %
 
 ifneq (,$(filter distclean,$(MAKECMDGOALS)))
 ifeq (,$(SOURCES_BUILT_FILES)$(DIST_BUILT_FILES))
-$(error Directory is clean)
+$(info <error>Directory is clean</error>)
+$(error )
 endif
 endif
 
 ifneq (,$(filter clean,$(MAKECMDGOALS)))
 ifeq (,$(SOURCES_BUILT_FILES))
-$(error Directory is clean)
+$(info <error>Directory is clean</error>)
+$(error )
 endif
 endif
