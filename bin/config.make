@@ -1,16 +1,16 @@
 
-include ./bin/envir.config
+include ./build.config
 
 CC_ := $(CC)
 CC := $(ECHO)$(CC_) $(CC_FLAGS)
 CC_LINK := $(ECHO)$(CC_) $(CC_LINKER_FLAGS) $(LIBS)
 
-SOURCES_FILES := $(wildcard ./src/*.c)
+SOURCES_FILES := $(wildcard $(SRC_DIR)/*.c)
 SOURCES_FILES_LIST := $(addprefix ,$(notdir $(SOURCES_FILES:.c=)))
-SOURCES_OBJ_FILES := $(addprefix ./temp/,$(notdir $(SOURCES_FILES:.c=$(OBJ))))
-SOURCES_EXE_FILES := ./dist/target$(EXE)
-SOURCES_BUILT_FILES := $(addprefix ./temp/,$(notdir $(wildcard ./temp/*)))
-DIST_BUILT_FILES := $(wildcard ./dist/*)
+SOURCES_OBJ_FILES := $(addprefix $(TEMP_DIR)/,$(notdir $(SOURCES_FILES:.c=$(OBJ))))
+SOURCES_EXE_FILES := $(DIST_DIR)/target$(EXE)
+SOURCES_BUILT_FILES := $(addprefix $(TEMP_DIR)/,$(notdir $(wildcard $(TEMP_DIR)/*)))
+DIST_BUILT_FILES := $(wildcard $(DIST_DIR)/*)
 SOURCES_NUMBER := $(words $(SOURCES_FILES))
 SOURCES_MADE_NUMBER := %
 
