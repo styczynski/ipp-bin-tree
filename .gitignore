@@ -25,5 +25,8 @@
 
 # Executables
 *.exe
-*.out
 *.app
+
+# Test files
+*.out
+*.err
