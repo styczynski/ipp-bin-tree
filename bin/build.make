@@ -4,9 +4,9 @@
 # MIT License
 #
 
-ifeq (,$(filter clean distclean help build watch all run-test,$(MAKECMDGOALS)))
+ifeq (,$(filter clean distclean help build watch all run-test rebuildauto,$(MAKECMDGOALS)))
 ifneq (,$(MAKECMDGOALS))
-$(info <error>Unknown build command was used.</error>)
+$(info <error>Unknown build command was used: $(MAKECMDGOALS)</error>)
 $(error )
 endif
 endif
@@ -16,7 +16,7 @@ CC_SEL:=
 
 include ./bin/config.make
 
-.PHONY: help watch clean cleandist run-test
+.PHONY: help watch clean cleandist run-test rebuildauto
 
 help:
 	$(info )
@@ -83,6 +83,7 @@ $(TEMP_DIR)/%$(OBJ): $(SRC_DIR)/%.c
 
 $(DIST_DIR)/target$(EXE): $(SOURCES_OBJ_FILES)
 	$(CC_LINK) $@ $^
+	@if [[ '$(REBUILD_AUTO_MODE)' == 'true' ]]; then ./bin/test.sh --format --less-info; fi
 
 watch:
 	$(info <b>Starting autobuilds... watching files</b>)
@@ -90,4 +91,4 @@ watch:
 	@ while true; do make rebuildauto; sleep 1; done
 
 run-test:
-	bash ./bin/test.sh --format
+	@bash ./bin/test.sh --format

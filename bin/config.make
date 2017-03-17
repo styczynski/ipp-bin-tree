@@ -27,3 +27,8 @@ $(info <error>Directory is clean</error>)
 $(error )
 endif
 endif
+
+REBUILD_AUTO_MODE=false
+ifneq (,$(filter rebuildauto,$(MAKECMDGOALS)))
+REBUILD_AUTO_MODE=true
+endif
