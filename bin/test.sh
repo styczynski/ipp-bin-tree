@@ -223,7 +223,7 @@ not_exists_index=0
 not_exists_but_created_index=0
 for input_file_path in $param_dir/*.in
 do
-    if [[ -f $input_file_path ]]; then
+    if [[ -e $input_file_path ]]; then
       #TEST_RESULTS
       input_file=$(basename $input_file_path)
       good_out_path=$flag_good_out_path/${input_file/.in/.out}
@@ -253,7 +253,7 @@ do
           fi
         fi
 
-        if [ -s "$good_out_path" ]; then
+        if [ -e "$good_out_path" ]; then
           diff=$(diff --text --minimal --suppress-blank-empty --strip-trailing-cr --ignore-case --ignore-tab-expansion --ignore-trailing-space --ignore-space-change --ignore-all-space --ignore-blank-lines $out_path $good_out_path)
           if [[ $diff != '' ]]; then
             err_index=$((err_index+1))
