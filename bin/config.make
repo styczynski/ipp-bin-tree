@@ -1,6 +1,9 @@
 
 include ./build.config
 
+PRM_FLAG_INPUT_SYM=%
+PRM_FLAG_OUTPUT_SYM=-
+
 CC_ := $(CC)
 CC := $(ECHO)$(CC_) $(CC_FLAGS)
 CC_LINK := $(ECHO)$(CC_) $(CC_LINKER_FLAGS) $(LIBS)

@@ -50,7 +50,7 @@ build: sources
 
 all: sources
 
-rebuildauto: sources_noecho
+rebuildauto: sources_noecho $(TEMP_DIR)/autotest.cache
 	@true
 
 sources_base: $(TEMP_DIR) $(DIST_DIR) $(SOURCES_OBJ_FILES) $(SOURCES_EXE_FILES)
@@ -83,7 +83,11 @@ $(TEMP_DIR)/%$(OBJ): $(SRC_DIR)/%.c
 
 $(DIST_DIR)/target$(EXE): $(SOURCES_OBJ_FILES)
 	$(CC_LINK) $@ $^
-	@if [[ '$(REBUILD_AUTO_MODE)' == 'true' ]]; then ./bin/test.sh --format --less-info; fi
+
+$(TEMP_DIR)/autotest.cache: $(DIST_DIR)/target$(EXE)
+	@bash ./bin/test.sh "$(DIST_DIR)/target$(EXE)" "$(TEST_DIR)"  --tm --terr "$(TEST_RESULTS_DIR)/err" --tout "$(TEST_RESULTS_DIR)/out" --tterm-format $(subst $(PRM_FLAG_INPUT_SYM),$(PRM_FLAG_OUTPUT_SYM),$(filter-out $@,$(MAKECMDGOALS)))
+	@echo "UPDATED" > $(TEMP_DIR)/autotest.cache
+	@touch $(TEMP_DIR)/autotest.cache
 
 watch:
 	$(info <b>Starting autobuilds... watching files</b>)
@@ -91,4 +95,4 @@ watch:
 	@ while true; do make rebuildauto; sleep 1; done
 
 run-test:
-	@bash ./bin/test.sh --format
+	@bash ./bin/test.sh "$(DIST_DIR)/target$(EXE)" "$(TEST_DIR)"  --terr "$(TEST_RESULTS_DIR)/err" --tout "$(TEST_RESULTS_DIR)/out" --tterm-format $(subst $(PRM_FLAG_INPUT_SYM),$(PRM_FLAG_OUTPUT_SYM),$(filter-out $@,$(MAKECMDGOALS)))

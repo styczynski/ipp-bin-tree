@@ -121,6 +121,7 @@ fi
 
 if [[ ${flag_force} = 'false' ]]; then
   if [[ $param_prog = '' ]]; then
+    printf "${B_DEBUG} $* ${E_DEBUG}"
     printf "${B_ERR}Tested program name was not given. (parameter <prog> is missing)${E_ERR}\n"
     printf "${B_ERR}Usage: test <prog> <input_dir> [flags]${E_ERR}\n"
     printf "${B_DEBUG}Use -f option to forcefully proceed.${E_DEBUG}\n"
@@ -228,7 +229,7 @@ do
       good_out_path=$flag_good_out_path/${input_file/.in/.out}
       out_path=$flag_out_path/${input_file/.in/.out}
       err_path=$flag_err_path/${input_file/.in/.err}
-      $param_prog $input_prog_flag_acc < $input_file_path 1> $out_path 2> $err_path
+      r=$($param_prog $input_prog_flag_acc < $input_file_path 1> $out_path 2> $err_path)
       if [ -s "$err_path" ]; then
         err_index=$((err_index+1))
         err_message=$(cat "$err_path")
@@ -286,7 +287,7 @@ do
           warn_index=$((warn_index+1))
           if [[ ${flag_auto_test_creation} = 'true' ]]; then
             not_exists_but_created_index=$((not_exists_but_created_index+1))
-            $param_prog $input_prog_flag_acc < $input_file_path 1> $good_out_path 2> /dev/null
+            r=$($param_prog $input_prog_flag_acc < $input_file_path 1> $good_out_path 2> /dev/null)
           else
             not_exists_index=$((not_exists_index+1))
             if [[ "$not_exists_index" -lt "10" ]]; then

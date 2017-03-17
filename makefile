@@ -1,8 +1,13 @@
 FORCE:
-	@bash ./bin/build.sh help
+	@true;
 
-%:
-	@bash ./bin/build.sh $*
+%: CALL
+	@true;
 
-.PHONY:
+CALL:
+	@bash ./bin/build.sh $(MAKECMDGOALS)
+
+.PHONY: default
+
+default:
 	@bash ./bin/build.sh help

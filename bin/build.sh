@@ -17,6 +17,7 @@ notation_manual_info="s/!info!/$(printf $blue)/i"
 notation_manual_warn="s/!warn!/$(printf $yellow)/i"
 notation_manual_debug="s/!debug!/$(printf $gray)/i"
 notation_manual_good="s/!good!/$(printf $green)/i"
+notation_manual_ok="s/!ok!/$(printf $green)/i"
 notation_manual_normal="s/!normal!/$(printf $normal)/i"
 
 notation_bolder="s/(<b>)(.+?)(<\/b>)/$(printf $bold)\\2$(printf $normal)/i"
@@ -33,4 +34,4 @@ make="s/^make(\[[0-9]+\])?:(.*)//"
 make_err="s/(.*)(\*\*\*)(.*)//"
 compiler_recipe="s/^((gcc|g\+\+|clang)(.exe)? .*)/$(printf $gray)\\1$(printf $normal)/"
 
-command "make" "--no-print-directory" "--makefile=./bin/build.make" "$@" 2>&1 | sed -ru -e "$notation_manual_bold" -e "$notation_manual_error" -e "$notation_manual_info" -e "$notation_manual_warn" -e "$notation_manual_debug" -e "$notation_manual_good" -e "$notation_manual_normal" -e "$notation_backspace" -e "$notation_ignore" -e "$warning" -e "$error" -e "$notation_bolder" -e "$notation_error" -e "$notation_good" -e "$notation_info" -e "$notation_warn" -e "$notation_debug" -e "$make_err" -e "$make" -e "$compiler_recipe"
+command "make" "--no-print-directory" "--makefile=./bin/build.make" "$@" 2>&1 | sed -ru -e "$notation_manual_bold" -e "$notation_manual_error" -e "$notation_manual_info" -e "$notation_manual_warn" -e "$notation_manual_debug" -e "$notation_manual_good" -e "$notation_manual_ok" -e "$notation_manual_normal" -e "$notation_backspace" -e "$notation_ignore" -e "$warning" -e "$error" -e "$notation_bolder" -e "$notation_error" -e "$notation_good" -e "$notation_info" -e "$notation_warn" -e "$notation_debug" -e "$make_err" -e "$make" -e "$compiler_recipe"
