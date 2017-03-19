@@ -12,6 +12,7 @@ help:
 	$(info |  <warn>'make distclean'</warn> - Cleans all directories - that is compilation cache and dist folder )
 	$(info |  <warn>'make help'</warn> - Displays this help )
 	$(info |  <warn>'make watch'</warn> - Starts smart autobuilds )
-	$(info |  <warn>'make run-test'</warn> - Runs all available tests )
+	$(info |  <warn>'make test'</warn> - Runs all available tests )
+	$(info |  <warn>'make run'</warn> - Runs app )
 	$(info )
 	$(info )

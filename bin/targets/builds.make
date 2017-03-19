@@ -1,4 +1,9 @@
 
+REBUILD_AUTO_MODE=false
+ifneq (,$(filter rebuildauto,$(MAKECMDGOALS)))
+REBUILD_AUTO_MODE=true
+endif
+
 rebuild: clean-all
 
 build: sources
@@ -21,5 +26,5 @@ $(TEMP_DIR)/%$(OBJ): $(SRC_DIR)/%.c
 	$(info <debug>Compiling file $< </debug>)
 	$(CC) $@ $<
 
-$(DIST_DIR)/target$(EXE): $(SOURCES_OBJ_FILES)
+$(DIST_DIR)/$(TARGET_NAME)$(EXE): $(SOURCES_OBJ_FILES)
 	$(CC_LINK) $@ $^

@@ -1,4 +1,5 @@
 
+
 clean: clean-temp
 	$(info <b>Project cleaned. Done</b>)
 
@@ -16,5 +17,5 @@ clean-obj:
 
 clean-dist:
 	$(info <debug>Cleaning dist</debug>)
-	$(ECHO)rm -f -d -r $(TEMP_DIR)
-	$(ECHO)rm -f -d -r $(DIST_DIR)
+	$(ECHO)rm -f -d -r $(TEMP_DIR) $(TEST_RESULTS_DIR)
+	$(ECHO)rm -f -d -r $(DIST_DIR) $(TEST_RESULTS_DIR)

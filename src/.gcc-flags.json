@@ -1,0 +1,8 @@
+{
+  "execPath": "gcc",
+  "gccDefaultCFlags": "-Wall -Wextra -std=c99",
+  "gccDefaultCppFlags": "-Wall -Wextra -std=c99",
+  "gccErrorLimit": 15,
+  "gccIncludePaths": "",
+  "gccSuppressWarnings": false
+}

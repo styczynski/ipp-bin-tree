@@ -49,13 +49,14 @@ param_counter=0
 while test $# != 0
 do
     case "$1" in
+    --tgout) shift; flag_good_out_path="$1" ;;
     --tsty-format) flag_formating=sty ;;
     --tterm-format) flag_formating=term ;;
     --tnone-format) flag_formating=none ;;
     --tc) flag_formating=none ;;
     --tless-info) flag_skip_ok=true ;;
-    --tout) shift; flag_out_path=$1 ;;
-    --terr) shift; flag_err_path=$1 ;;
+    --tout) shift; flag_out_path="$1" ;;
+    --terr) shift; flag_err_path="$1" ;;
     --tf) flag_force=true ;;
     --tt) flag_auto_test_creation=true ;;
     --ts) flag_skip_ok=true ;;
@@ -64,8 +65,8 @@ do
     --tm) flag_skip_ok=true; flag_minimal=true ;;
     --tmm) flag_skip_ok=true; flag_minimal=true; flag_very_minimal=true ;;
     --tmmm) flag_skip_ok=true; flag_minimal=true; flag_very_minimal=true; flag_extreamely_minimalistic=true ;;
-    -help) printf "\nUsage:\n     test  <prog> <dir> [flags]\n      <prog> is path to the executable, you want to test\n      <dir> is the path to folder containing .in/.out files\n      All available flags are:\n        --tsty-format - use !error!, !info! etc. output format\n        --tterm-format - use (default) term color formatting\n        --tc, --tnone-format - use clean character output\n        --ts - Skip oks\n        --terr <dir> - set .err output directory (default is /out)\n        --tout <dir> set output .out file directory (default is /out)\n        --tf - proceed even if directories do not exists etc.\n        --tt - automatically create missing .out files using program output\n        --tn - skip after-testing summary\n        --ta - abort after +5 errors\n        -help - display this help\n        --tm - use minimalistic mode (less output)\n        --tmm - use very minimalistic mode (even less output)\n        --tmmm - use the most minimialistic mode (only file names are shown)\n\n"; exit 0 ;;
-    --help) printf "\nUsage:\n     test  <prog> <dir> [flags]\n      <prog> is path to the executable, you want to test\n      <dir> is the path to folder containing .in/.out files\n      All available flags are:\n        --tsty-format - use !error!, !info! etc. output format\n        --tterm-format - use (default) term color formatting\n        --tc, --tnone-format - use clean character output\n        --ts - Skip oks\n        --terr <dir> - set .err output directory (default is /out)\n        --tout <dir> set output .out file directory (default is /out)\n        --tf - proceed even if directories do not exists etc.\n        --tt - automatically create missing .out files using program output\n        --tn - skip after-testing summary\n        --ta - abort after +5 errors\n        -help - display this help\n        --tm - use minimalistic mode (less output)\n        --tmm - use very minimalistic mode (even less output)\n        --tmmm - use the most minimialistic mode (only file names are shown)\n\n"; exit 0 ;;
+    -help) printf "\nUsage:\n     test  <prog> <dir> [flags]\n      <prog> is path to the executable, you want to test\n      <dir> is the path to folder containing .in/.out files\n      All available flags are:\n        --tsty-format - use !error!, !info! etc. output format\n        --tterm-format - use (default) term color formatting\n        --tc, --tnone-format - use clean character output\n        --ts - Skip oks\n        --tgout <dir> - set (good) .out input directory (default is the same as dir/inputs will be still found in dir location/use when .out and .in are in separate locations)\n        --terr <dir> - set .err output directory (default is /out)\n        --tout <dir> set output .out file directory (default is /out)\n        --tf - proceed even if directories do not exists etc.\n        --tt - automatically create missing .out files using program output\n        --tn - skip after-testing summary\n        --ta - abort after +5 errors\n        -help - display this help\n        --tm - use minimalistic mode (less output)\n        --tmm - use very minimalistic mode (even less output)\n        --tmmm - use the most minimialistic mode (only file names are shown)\n\n"; exit 0 ;;
+    --help) printf "\nUsage:\n     test  <prog> <dir> [flags]\n      <prog> is path to the executable, you want to test\n      <dir> is the path to folder containing .in/.out files\n      All available flags are:\n        --tsty-format - use !error!, !info! etc. output format\n        --tterm-format - use (default) term color formatting\n        --tc, --tnone-format - use clean character output\n        --ts - Skip oks\n        --tgout <dir> - set (good) .out input directory (default is the same as dir/inputs will be still found in dir location/use when .out and .in are in separate locations)\n        --terr <dir> - set .err output directory (default is /out)\n        --tout <dir> set output .out file directory (default is /out)\n        --tf - proceed even if directories do not exists etc.\n        --tt - automatically create missing .out files using program output\n        --tn - skip after-testing summary\n        --ta - abort after +5 errors\n        -help - display this help\n        --tm - use minimalistic mode (less output)\n        --tmm - use very minimalistic mode (even less output)\n        --tmmm - use the most minimialistic mode (only file names are shown)\n\n"; exit 0 ;;
     *) {
       if [[ $1 == -* ]]; then
         input_prog_flag_acc="$input_prog_flag_acc $1"
@@ -77,6 +78,9 @@ do
           if [[ "$param_counter" == 1 ]]; then
             param_counter=2
             param_dir="$1"
+            if [[ "$flag_good_out_path" = "" ]]; then
+              flag_good_out_path="$1"
+            fi
           else
             input_prog_flag_acc="$input_prog_flag_acc $1"
           fi
@@ -86,7 +90,6 @@ do
     esac
     shift
 done
-flag_good_out_path="$param_dir"
 
 
 if [[ ${flag_formating} = 'sty' ]]; then

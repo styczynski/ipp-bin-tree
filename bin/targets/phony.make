@@ -1,2 +1,2 @@
 
-.PHONY: help watch clean cleandist run-test rebuildauto
+.PHONY: help watch clean cleandist test rebuildauto

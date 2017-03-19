@@ -1,0 +1,22 @@
+
+#include "list.h"
+
+#define XTREE_DECL_LIST_TYPENAME__(NAME) NAME##Int
+#define XTREE_DECL_LIST_TYPE__ int
+#define XTREE_DECL_LIST_TYPE_DEFAULT__ (-1)
+#define XTREE_DECL_LIST_TYPE_PRINTF_SIG__ "%d; "
+#include "templated_list.c"
+#undef XTREE_DECL_LIST_TYPE_DEFAULT__
+#undef XTREE_DECL_LIST_TYPENAME__
+#undef XTREE_DECL_LIST_TYPE__
+#undef XTREE_DECL_LIST_TYPE_PRINTF_SIG__
+
+#define XTREE_DECL_LIST_TYPENAME__(NAME) NAME##Generic
+#define XTREE_DECL_LIST_TYPE__ void*
+#define XTREE_DECL_LIST_TYPE_DEFAULT__ NULL
+#define XTREE_DECL_LIST_TYPE_PRINTF_SIG__ "%p; "
+#include "templated_list.c"
+#undef XTREE_DECL_LIST_TYPE_DEFAULT__
+#undef XTREE_DECL_LIST_TYPENAME__
+#undef XTREE_DECL_LIST_TYPE__
+#undef XTREE_DECL_LIST_TYPE_PRINTF_SIG__

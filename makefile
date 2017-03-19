@@ -8,7 +8,7 @@ endif
 # Override default behaviour
 #
 default:
-	@bash ./bin/build.sh $(DEFAULT_TARGET)
+	@bash ./bin/shell/build.sh $(DEFAULT_TARGET)
 	@exit 0
 
 FORCE:
@@ -20,6 +20,6 @@ ifneq (,$(MAKECMDGOALS))
 endif
 
 CALL:
-	@bash ./bin/build.sh $(MAKECMDGOALS)
+	@bash ./bin/shell/build.sh $(MAKECMDGOALS)
 
 .PHONY: default
