@@ -29,4 +29,4 @@
 
 # Test files
 ./test_results/*.out
-*.err
+./test_results/*.err
