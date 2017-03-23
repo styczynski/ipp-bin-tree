@@ -8,6 +8,7 @@ help:
 	$(info )
 	$(info |  <warn>'make all'</warn> - Alias for 'make build')
 	$(info |  <warn>'make build'</warn> - Builds application )
+	$(info |  <warn>'make rebuild'</warn> - Rebuilds application totally )
 	$(info |  <warn>'make clean'</warn> - Cleans compilation cache )
 	$(info |  <warn>'make distclean'</warn> - Cleans all directories - that is compilation cache and dist folder )
 	$(info |  <warn>'make help'</warn> - Displays this help )

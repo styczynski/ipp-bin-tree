@@ -224,7 +224,7 @@ ok_index=0
 warn_index=0
 not_exists_index=0
 not_exists_but_created_index=0
-for input_file_path in $param_dir/*.in
+for input_file_path in `ls -v $param_dir/*.in`
 do
     if [[ -e $input_file_path ]]; then
       #TEST_RESULTS

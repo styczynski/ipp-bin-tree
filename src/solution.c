@@ -1,16 +1,31 @@
-#include "tree.h"
+#include "incremental_tree.h"
+#include "parser.h"
 #include <stdio.h>
 #include <string.h>
 
 int main(void) {
 
-  tree t = treeNew();
-  treeAddNode(t, 0, 0);
-  treeAddNode(t, 0, 1);
-  treeAddNode(t, 1, 2);
-  treeAddNode(t, 0, 3);
+  incrTree t = IncrTrees.new();
+  while(treeInReadCommand(t)) {};
 
-  printTree(t);
+  /*tree t = treeNew();
+  printTree(t);fflush(stdout);
+  treeAddNode(t, -1, 0);
+  printTree(t);fflush(stdout);
+  treeAddNode(t, 0, 1);
+  printTree(t);fflush(stdout);
+  treeAddNode(t, 1, 2);
+  printTree(t);fflush(stdout);
+  treeAddNode(t, 0, 3);
+  printTree(t);fflush(stdout);
+  treeDeleteSubtree(t, 1);
+  printTree(t);fflush(stdout);
+  //printTree(t);fflush(stdout);
+  //treeRemoveNode(t, 0);*/
+  //printTree(t);fflush(stdout);
+
+  //treeRemoveNode(t, 2);
+  //printTree(t);
 
   /*char command[30];
   int k, w;

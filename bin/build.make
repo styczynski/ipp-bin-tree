@@ -22,7 +22,7 @@ CC := $(ECHO)$(CC_) $(CC_FLAGS)
 CC_LINK := $(ECHO)$(CC_) $(CC_LINKER_FLAGS) $(LIBS)
 CC_SEL:=
 
-ifeq (,$(filter clean distclean help build watch all test rebuildauto run $(CUSTOM_COMMANDS),$(MAKECMDGOALS)))
+ifeq (,$(filter clean distclean help build watch all test rebuildauto run rebuild $(CUSTOM_COMMANDS),$(MAKECMDGOALS)))
 ifneq (,$(MAKECMDGOALS))
 $(info <error>Unknown build command was used: $(MAKECMDGOALS)</error>)
 $(error )

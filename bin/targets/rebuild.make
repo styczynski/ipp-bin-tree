@@ -1,0 +1,3 @@
+
+rebuild: distclean all
+	@true
