@@ -5,6 +5,8 @@
 #ifndef XTREE_TREE_H__
 #define XTREE_TREE_H__
 
+#define TREE_REF_TAB_INITIAL_SIZE 107
+#define TREE_DEBUG DBG debugInfoTree
 
 typedef struct treeNodeValue treeNodeValue;
 typedef struct treeRoot treeRoot;
@@ -35,6 +37,7 @@ struct treeRoot {
   int refTabSize;
 };
 
+const treeNode* nullTreeNodePtr;
 const treeNodeValue nullTreeNodeValue;
 const treeRoot nullTreeRoot;
 const trees Trees;
@@ -54,5 +57,6 @@ void printTree(tree t);
 void treeUpdateChildrenUpwardRefs(treeNode* node);
 void treeSplitNode(tree t, int parent, int splitNode, int child);
 void treeDeleteSubtree(tree t, int number);
+void debugInfoTree(treeNode* node, const char* format, ...);
 
 #endif

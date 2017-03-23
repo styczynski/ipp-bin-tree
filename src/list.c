@@ -256,8 +256,6 @@ void detachListElement( list l, listNode* node ) {
   listNode* left_neighbour = node->left;
   listNode* right_neighbour = node->right;
 
-  DBG printf("Detach %p from %p [left=%p right=%p]\n", node, l, left_neighbour, right_neighbour);fflush(stdout);
-
   if(left_neighbour != NULL) {
     left_neighbour->right = right_neighbour;
   } else {
@@ -268,9 +266,7 @@ void detachListElement( list l, listNode* node ) {
   } else {
     l->end = left_neighbour;
   }
-  DBG printf("Detach.free()\n");fflush(stdout);
   free(node);
-  DBG printf("Detach.done()\n");fflush(stdout);
 }
 
 listNode* newListDetachedElement() {
@@ -282,9 +278,7 @@ listNode* newListDetachedElement() {
 }
 
 int isListSideElement( listNode* node ) {
-  DBG printf("Check sideness := %p ...\n", node);fflush(stdout);
   if(node == NULL) return 0;
-  DBG printf("Check sideness := %p {left=%p right=%p}\n", node, node->left, node->right);fflush(stdout);
   return ( (node->left == NULL) || (node->right == NULL) );
 }
 
@@ -354,6 +348,8 @@ list splitList( list src, listNode* splitter ) {
   if(splitter->right != NULL) {
     ret->begin = splitter->right;
     ret->end = realEnd;
+    splitter->right = NULL;
+    ret->begin->left = NULL;
   }
   return ret;
 }

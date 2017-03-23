@@ -5,6 +5,27 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
+#include <stdarg.h>
+
+void debugInfoTree(treeNode* node, const char* format, ...) {
+  treeNodeValue* value = treeGetNodeValue(node);
+  void* children = NULL;
+  int id = -1;
+  if(value != NULL) {
+    children = value->children;
+    id = value->number;
+  }
+  va_list arg;
+  va_start (arg, format);
+  if(node == NULL) {
+    debugInfo(format, "                                                  -> ", id, node, value, children);
+  } else {
+    debugInfo(format, " NODE:%d  { %p <%p> [%p] } -> ", id, node, value, children);
+  }
+  va_end (arg);
+}
+
+const treeNode* nullTreeNodePtr = NULL;
 
 const trees Trees = {
   .new = treeNew,
@@ -36,8 +57,30 @@ treeNodeValue* treeGetNodeValue(treeNode* node) {
 
 treeNode* treeFindNode(tree t, int number) {
   if(t==NULL) return NULL;
+  if(number<0) {
+    TREE_DEBUG (t->root, " [WARN] ABNORMAL CASE -> FIND NDOE RETURNED ROOT number:%d", number);
+  }
   if(number<0) return t->root;
   return (t->refTab)[number];
+}
+
+void treePutRef(tree t, int number, treeNode* node) {
+  if(t == NULL) return;
+  if(t->refTab == NULL) return;
+  TREE_DEBUG (node, " PUT REF number: %d", number);
+
+  if(number<0) {
+    printf("[ERROR] Tried to access %d index refTab\n", number);
+    fflush(stdout);
+    return;
+  }
+  if(number>=(t->refTabSize)) {
+    const int newSize = (t->refTabSize)*2 - (t->refTabSize)/2;
+    t->refTab = realloc(t->refTab, newSize*sizeof(nullTreeNodePtr));
+    TREE_DEBUG (node, " RESIZE REF-TAB TO %d (%d B)", newSize, (newSize*sizeof(nullTreeNodePtr)));
+    t->refTabSize = newSize;
+  }
+  (t->refTab)[number] = node;
 }
 
 treeNodeValue* treeNewNodeValue(int number) {
@@ -51,15 +94,15 @@ treeNodeValue* treeNewNodeValue(int number) {
 treeNode* treeNewNode(tree t, int number) {
   treeNode* node = Lists.newDetachedElement();
   node->value = (void*)treeNewNodeValue(number);
-  (t->refTab)[number] = node;
+  treePutRef(t, number, node);
   return node;
 }
 
 tree treeNew() {
   tree t = malloc(sizeof(nullTreeRoot));
   t->root = NULL;
-  t->refTab = malloc(100*sizeof(int));
-  t->refTabSize = 100;
+  t->refTab = malloc((TREE_REF_TAB_INITIAL_SIZE)*sizeof(nullTreeNodePtr));
+  t->refTabSize = TREE_REF_TAB_INITIAL_SIZE;
   for(int i=0;i<t->refTabSize;++i) {
     (t->refTab)[i] = NULL;
   }
@@ -70,16 +113,20 @@ tree treeNew() {
 
 void treeAddNode(tree t, int parent, int child) {
   if(t == NULL) return;
+  TREE_DEBUG (NULL, " ADD NODE parent:%d child:%d", parent, child);
   if(t->root == NULL) {
     t->root = treeNewNode(t, parent);
+    TREE_DEBUG (t->root, " ADDED NODE -> AS ROOT");
     (t->refTab)[parent] = t->root;
   } else {
     treeNode* parentNode = treeFindNode(t, parent);
+    TREE_DEBUG (parentNode, " ADD NODE TO SELF child:%d", child);
     treeNodeValue* parentNodeValue = treeGetNodeValue(parentNode);
     treeNodeValue* childNodeValue = treeNewNodeValue(child);
     childNodeValue->parent = parentNode;
     treeNode* childNode = (treeNode*) Lists.pushBack(parentNodeValue->children, childNodeValue);
-    (t->refTab)[child] = childNode;
+    treePutRef(t, child, childNode);
+    TREE_DEBUG (t->root, " ADDED NODE -> AS NORMAL");
     //treeNode* childNode = treeNewNode(t, child);
     //Lists.pushBack(treeGetNodeValue(parentNode)->children, treeGetNodeValue(childNode));
   }
@@ -88,13 +135,17 @@ void treeAddNode(tree t, int parent, int child) {
 int treeGetRightmostChild(tree t, int number) {
   if(t == NULL) return -1;
   treeNode* node = treeFindNode(t, number);
+  TREE_DEBUG (node, " OBTAIN RIGHTMOST number: %d", number);
   treeNodeValue* nodeValue = treeGetNodeValue(node);
   if(nodeValue != NULL) {
     treeNodeValue* rightmostChildValue = (treeNodeValue*) Lists.last(nodeValue->children);
+    TREE_DEBUG (NULL, " OBTAIN RIGHTMOST -> VALUE: %p", rightmostChildValue);
     if(rightmostChildValue != NULL) {
+      TREE_DEBUG (NULL, " OBTAIN RIGHTMOST END -> GOT number: %d", rightmostChildValue->number);
       return rightmostChildValue->number;
     }
   }
+  TREE_DEBUG (NULL, " OBTAIN RIGHTMOST END -> EXIT(-1)");
   return -1;
 }
 
@@ -108,7 +159,7 @@ void printTreeNode(treeNode* node, int rlevel, int printToplevelLabel) {
 
   if(!Lists.empty(nodeValue->children)) {
     if(printToplevelLabel){
-      printf("Node %d - %p: [%p] <%p> {\n", nodeValue->number, node, nodeValue->children, nodeValue );fflush(stdout);
+      printf("Node %d - %p: [%p] <%p> | %p {\n", nodeValue->number, node, nodeValue->children, nodeValue, nodeValue->parent );fflush(stdout);
     }
     loop_list(nodeValue->children) {
       printTreeNode((treeNode*)it, rlevel+1, 1);fflush(stdout);
@@ -118,7 +169,7 @@ void printTreeNode(treeNode* node, int rlevel, int printToplevelLabel) {
       printf("}\n");fflush(stdout);
     }
   } else if(printToplevelLabel) {
-    printf("Node %d - %p [%p] <%p>\n", nodeValue->number, node, nodeValue->children, nodeValue);fflush(stdout);
+    printf("Node %d - %p [%p] <%p> | %p\n", nodeValue->number, node, nodeValue->children, nodeValue, nodeValue->parent);fflush(stdout);
   }
 
 }
@@ -143,13 +194,17 @@ void printTree(tree t) {
 }
 
 void treeUpdateChildrenUpwardRefs(treeNode* node) {
+  TREE_DEBUG (node, " UPDATE REFS");
   if(node == NULL) return;
   treeNodeValue* nodeValue = treeGetNodeValue(node);
   if(nodeValue == NULL) return;
   treeNodeValue* firstChildValue = (treeNodeValue*) Lists.first(nodeValue->children);
   treeNodeValue* lastChildValue = (treeNodeValue*) Lists.last(nodeValue->children);
+
+  TREE_DEBUG (NULL, " UPDATE REFS: LEFT-/RIGHTMOST -> %p / %p ", firstChildValue, lastChildValue);
   if(firstChildValue != NULL) firstChildValue->parent = node;
   if(lastChildValue != NULL) lastChildValue->parent = node;
+  TREE_DEBUG (node, " UPDATE REFS DONE");
 }
 
 void treeRemoveNode(tree t, int number) {
@@ -158,7 +213,9 @@ void treeRemoveNode(tree t, int number) {
 
   treeNode* node = treeFindNode(t, number);
 
+  TREE_DEBUG (node, " REMOVE NODE");
   if(node == t->root) {
+    TREE_DEBUG (node, " REMOVE NODE -> EXIT() BECAUSE ROOT");
     return;
   } else {
     treeNodeValue* nodeValue = treeGetNodeValue(node);
@@ -167,51 +224,67 @@ void treeRemoveNode(tree t, int number) {
       if(Lists.isSideElement(node)) {
         treeNode* parentNode = nodeValue->parent;
         treeNodeValue* parentNodeValue = treeGetNodeValue(parentNode);
-        DBG printf("removeNode (side)...\n");fflush(stdout);
+        TREE_DEBUG (node, " REMOVE NODE - SIDED branch");
+        TREE_DEBUG (node, " REMOVE NODE - PARENT VALUE: %p", parentNodeValue);
         if(parentNodeValue != NULL) {
-          DBG printf("insertListAt\n");fflush(stdout);
+          TREE_DEBUG (node, " INSERT LIST AT NODE, PARENT.CHILDREN = %p", parentNodeValue->children);
           Lists.insertListAt(parentNodeValue->children, node, nodeValue->children);
-          DBG printf("detachElement\n");fflush(stdout);
+          TREE_DEBUG (node, " DETACH ELEMENT AT NODE, PARENT.CHILDREN = %p", parentNodeValue->children);
           Lists.detachElement(parentNodeValue->children, node);
         }
         treeUpdateChildrenUpwardRefs(parentNode);
       } else {
-        DBG printf("insertListAt (nonside)\n");fflush(stdout);
+        TREE_DEBUG (node, " REMOVE NODE - NON-SIDED branch");
+        TREE_DEBUG (node, " INSERT LIST AT NODE");
         Lists.insertListAt(NULL, node, nodeValue->children);
-        DBG printf("detachElement (nonside)\n");fflush(stdout);
+        TREE_DEBUG (node, "DETACH ELEMENT AT NODE");
         Lists.detachElement(NULL, node);
       }
-      DBG printf("Free node value\n");fflush(stdout);
+      TREE_DEBUG (node, " FREE NODE VALUE");
       free(nodeValue);
     }
   }
-  DBG printf("Done?\n");fflush(stdout);
-  (t->refTab)[number] = NULL;
+  TREE_DEBUG (NULL, " DONE REMOVING NODE EXIT()");
+  treePutRef(t, number, NULL);
 }
 
 void treeSplitNode(tree t, int parent, int splitNode, int child) {
   treeNode* parentNode = treeFindNode(t, parent);
   treeNode* splitingNode = treeFindNode(t, splitNode);
+
+  TREE_DEBUG (splitingNode, " SPLIT NODE, PARENT = %p", parentNode);
+
   treeNodeValue* parentNodeValue = treeGetNodeValue(parentNode);
   list rightChildren = Lists.splitList(parentNodeValue->children, splitingNode);
 
+  TREE_DEBUG (splitingNode, " SPLIT NODE, LIST SPLITTED NOW ADD NEW NODE");
   treeNodeValue* childNodeValue = treeNewNodeValue(child);
   childNodeValue->parent = parentNode;
   Lists.free(childNodeValue->children);
   childNodeValue->children = rightChildren;
   treeNode* childNode = (treeNode*) Lists.pushBack(parentNodeValue->children, childNodeValue);
-  (t->refTab)[child] = childNode;
+  treePutRef(t, child, childNode);
+
+  TREE_DEBUG (childNode, " SPLIT NODE -> NEW NODE ADDED: THIS ");
 
   treeUpdateChildrenUpwardRefs(childNode);
+  treeUpdateChildrenUpwardRefs(parentNode);
 }
 
 void treeDeleteNodeValueRec(tree t, treeNodeValue* value) {
   if(value == NULL) return;
+  treePutRef(t, value->number, NULL);
+  TREE_DEBUG (NULL, " FREE NODE VALUE -> BEGIN %p", value);
   loop_list(value->children) {
+    TREE_DEBUG (NULL, " FREE NODE VALUE (RECURSE INTO)----> %p", value);
     treeDeleteNodeValueRec(t, treeGetNodeValue(it));
   }
+  TREE_DEBUG (NULL, " FREE NODE VALUE -> DELETE %p", value);
+  TREE_DEBUG (NULL, " FREE NODE VALUE -> DELETE CHILDREN LIST %p", value->children);
   Lists.free(value->children);
+  TREE_DEBUG (NULL, " FREE NODE VALUE -> DELETE REAL %p", value);
   free(value);
+  TREE_DEBUG (NULL, " FREE NODE VALUE END");
 }
 
 void treeDeleteNodeSubtree(tree t, treeNode* node) {
@@ -219,33 +292,35 @@ void treeDeleteNodeSubtree(tree t, treeNode* node) {
   if(t->root == NULL) return;
 
   treeNodeValue* nodeValue = treeGetNodeValue(node);
+  TREE_DEBUG (node, " REMOVE NODE-SUBTREE");
   if(nodeValue != NULL) {
 
     if(Lists.isSideElement(node)) {
       treeNode* parentNode = nodeValue->parent;
       treeNodeValue* parentNodeValue = treeGetNodeValue(parentNode);
-      DBG printf("removeNode (side)...\n");fflush(stdout);
+      TREE_DEBUG (node, " REMOVE NODE-SUBTREE - SIDED branch");
+      TREE_DEBUG (node, " REMOVE NOD-SUBTREEE - PARENT VALUE: %p", parentNodeValue);
       if(parentNodeValue != NULL) {
-        DBG printf("insertListAt\n");fflush(stdout);
-        //Lists.insertListAt(parentNodeValue->children, node, nodeValue->children);
-        DBG printf("detachElement\n");fflush(stdout);
+        TREE_DEBUG (node, " DETACH SELF FROM NODE %p <%p> [%p]\n", parentNode, parentNodeValue, parentNodeValue->children);
         Lists.detachElement(parentNodeValue->children, node);
       }
+      TREE_DEBUG (node, " REMOVE NODE-SUBTREE - UPDATE REFS");
       treeUpdateChildrenUpwardRefs(parentNode);
     } else {
-      DBG printf("insertListAt (nonside)\n");fflush(stdout);
+      TREE_DEBUG (node, " REMOVE NODE-SUBTREE - NON-SIDED branch");
+      TREE_DEBUG (node, " INSERT LIST AT NODE");
       //Lists.insertListAt(NULL, node, nodeValue->children);
-      DBG printf("detachElement (nonside)\n");fflush(stdout);
+      TREE_DEBUG (node, "DETACH ELEMENT AT NODE");
       Lists.detachElement(NULL, node);
     }
-    DBG printf("Free node value\n");fflush(stdout);
+    TREE_DEBUG (node, " FREE NODE-SUBTREE VALUE");
     /*loop_list(nodeValue->children) {
       treeNode* child = (treeNode*)it;
       treeDeleteNodeSubtree(t, child);
     }*/
     treeDeleteNodeValueRec(t, nodeValue);
   }
-  DBG printf("Done?\n");fflush(stdout);
+  TREE_DEBUG (NULL, " DONE REMOVING NODE-SUBTREE EXIT()");
 }
 
 
@@ -258,6 +333,7 @@ void treeDeleteSubtree(tree t, int number) {
 }
 
 void treeFree(tree t) {
+  TREE_DEBUG (NULL, " FREE TREE");
   if(t == NULL) return;
   treeDeleteNodeSubtree(t, t->root);
   free(t->root);
