@@ -11,10 +11,10 @@ void debugInfoParser(const char* command, const char* format, ...) {
 }
 
 void treeInLogDebug(incrTree t) {
-
+  fprintf(stderr, "NODES: %d\n", IncrTrees.size(t));
 }
 
-int treeInParse(incrTree t, char* command, ...) {
+int treeInParse(incrTree t, int vmode, char* command, ...) {
   va_list vl;
   va_start(vl, command);
   if(strcmp(command, "ADD_NODE") == 0) {
@@ -68,11 +68,14 @@ int treeInParse(incrTree t, char* command, ...) {
     va_end(vl);
     return 0;
   }
+  if(vmode) {
+    treeInLogDebug(t);
+  }
   va_end(vl);
   return 1;
 }
 
-int treeInReadCommand(incrTree t) {
+int treeInReadCommand(incrTree t, int vmode) {
   char command[30];
   int k, w;
   int code = scanf("%s", command);
@@ -83,22 +86,22 @@ int treeInReadCommand(incrTree t) {
       IncrTrees.printTree(t);
     } else if(strcmp(command, "ADD_NODE") == 0) {
       scanf("%d", &k);
-      treeInParse(t, command, k);
+      treeInParse(t, vmode, command, k);
     } else if(strcmp(command, "RIGHTMOST_CHILD") == 0) {
       scanf("%d", &k);
-      treeInParse(t, command, k);
+      treeInParse(t, vmode, command, k);
     } else if(strcmp(command, "DELETE_NODE") == 0) {
       scanf("%d", &k);
-      treeInParse(t, command, k);
+      treeInParse(t, vmode, command, k);
     } else if(strcmp(command, "DELETE_SUBTREE") == 0) {
       scanf("%d", &k);
-      treeInParse(t, command, k);
+      treeInParse(t, vmode, command, k);
     } else if(strcmp(command, "SPLIT_NODE") == 0) {
       scanf("%d", &k);
       scanf("%d", &w);
-      treeInParse(t, command, k, w);
+      treeInParse(t, vmode, command, k, w);
     } else {
-      printf("[ERR] Unknown command: %s\n", command);
+      treeInParse(t, vmode, command);
       return -1;
     }
     return 1;

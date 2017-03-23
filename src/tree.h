@@ -23,6 +23,7 @@ struct trees {
   void (*printTree)(tree);
   void (*splitNode)(tree, int, int, int);
   void (*deleteSubtree)(tree, int);
+  int (*size)(tree);
 };
 
 struct treeNodeValue {
@@ -35,6 +36,7 @@ struct treeRoot {
   treeNode* root;
   treeNode** refTab;
   int refTabSize;
+  int size;
 };
 
 const treeNode* nullTreeNodePtr;
@@ -43,7 +45,7 @@ const treeRoot nullTreeRoot;
 const trees Trees;
 
 treeNodeValue* treeGetNodeValue(treeNode* node);
-treeNodeValue* treeNewNodeValue(int number);
+treeNodeValue* treeNewNodeValue(tree t, int number);
 treeNode* treeNewNode(tree t, int number);
 treeNode* treeFindNode(tree t, int number);
 tree treeNew();
@@ -58,5 +60,6 @@ void treeUpdateChildrenUpwardRefs(treeNode* node);
 void treeSplitNode(tree t, int parent, int splitNode, int child);
 void treeDeleteSubtree(tree t, int number);
 void debugInfoTree(treeNode* node, const char* format, ...);
+int treeGetSize(tree t);
 
 #endif

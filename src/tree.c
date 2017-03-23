@@ -35,7 +35,8 @@ const trees Trees = {
   .getRightmostChild = treeGetRightmostChild,
   .printTree = printTree,
   .splitNode = treeSplitNode,
-  .deleteSubtree = treeDeleteSubtree
+  .deleteSubtree = treeDeleteSubtree,
+  .size = treeGetSize
 };
 
 const treeRoot nullTreeRoot = {
@@ -83,17 +84,18 @@ void treePutRef(tree t, int number, treeNode* node) {
   (t->refTab)[number] = node;
 }
 
-treeNodeValue* treeNewNodeValue(int number) {
+treeNodeValue* treeNewNodeValue(tree t, int number) {
   treeNodeValue* ret = malloc(sizeof(nullTreeNodeValue));
   ret->number = number;
   ret->children = Lists.new();
   ret->parent = NULL;
+  (t->size)++;
   return ret;
 }
 
 treeNode* treeNewNode(tree t, int number) {
   treeNode* node = Lists.newDetachedElement();
-  node->value = (void*)treeNewNodeValue(number);
+  node->value = (void*)treeNewNodeValue(t, number);
   treePutRef(t, number, node);
   return node;
 }
@@ -107,7 +109,9 @@ tree treeNew() {
     (t->refTab)[i] = NULL;
   }
   t->root = Lists.newDetachedElement();
-  t->root->value = (void*)treeNewNodeValue(-1);
+  t->size = 0;
+  t->root->value = (void*)treeNewNodeValue(t, -1);
+  t->size = 0;
   return t;
 }
 
@@ -122,7 +126,7 @@ void treeAddNode(tree t, int parent, int child) {
     treeNode* parentNode = treeFindNode(t, parent);
     TREE_DEBUG (parentNode, " ADD NODE TO SELF child:%d", child);
     treeNodeValue* parentNodeValue = treeGetNodeValue(parentNode);
-    treeNodeValue* childNodeValue = treeNewNodeValue(child);
+    treeNodeValue* childNodeValue = treeNewNodeValue(t, child);
     childNodeValue->parent = parentNode;
     treeNode* childNode = (treeNode*) Lists.pushBack(parentNodeValue->children, childNodeValue);
     treePutRef(t, child, childNode);
@@ -241,6 +245,7 @@ void treeRemoveNode(tree t, int number) {
         Lists.detachElement(NULL, node);
       }
       TREE_DEBUG (node, " FREE NODE VALUE");
+      (t->size)--;
       free(nodeValue);
     }
   }
@@ -258,7 +263,7 @@ void treeSplitNode(tree t, int parent, int splitNode, int child) {
   list rightChildren = Lists.splitList(parentNodeValue->children, splitingNode);
 
   TREE_DEBUG (splitingNode, " SPLIT NODE, LIST SPLITTED NOW ADD NEW NODE");
-  treeNodeValue* childNodeValue = treeNewNodeValue(child);
+  treeNodeValue* childNodeValue = treeNewNodeValue(t, child);
   childNodeValue->parent = parentNode;
   Lists.free(childNodeValue->children);
   childNodeValue->children = rightChildren;
@@ -284,6 +289,7 @@ void treeDeleteNodeValueRec(tree t, treeNodeValue* value) {
   Lists.free(value->children);
   TREE_DEBUG (NULL, " FREE NODE VALUE -> DELETE REAL %p", value);
   free(value);
+  (t->size)--;
   TREE_DEBUG (NULL, " FREE NODE VALUE END");
 }
 
@@ -339,4 +345,9 @@ void treeFree(tree t) {
   free(t->root);
   free(t->refTab);
   free(t);
+}
+
+int treeGetSize(tree t) {
+  if(t == NULL) return 0;
+  return t->size;
 }

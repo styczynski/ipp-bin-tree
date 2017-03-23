@@ -11,7 +11,7 @@ flag_skip_summary=false
 flag_minimal=false
 flag_very_minimal=false
 flag_extreamely_minimalistic=false
-
+flag_good_err_path=
 input_prog_flag_acc=
 
 
@@ -50,6 +50,7 @@ while test $# != 0
 do
     case "$1" in
     --tgout) shift; flag_good_out_path="$1" ;;
+    --tgerr) shift; flag_good_err_path="$1" ;;
     --tsty-format) flag_formating=sty ;;
     --tterm-format) flag_formating=term ;;
     --tnone-format) flag_formating=none ;;
@@ -65,8 +66,8 @@ do
     --tm) flag_skip_ok=true; flag_minimal=true ;;
     --tmm) flag_skip_ok=true; flag_minimal=true; flag_very_minimal=true ;;
     --tmmm) flag_skip_ok=true; flag_minimal=true; flag_very_minimal=true; flag_extreamely_minimalistic=true ;;
-    -help) printf "\nUsage:\n     test  <prog> <dir> [flags]\n      <prog> is path to the executable, you want to test\n      <dir> is the path to folder containing .in/.out files\n      All available flags are:\n        --tsty-format - use !error!, !info! etc. output format\n        --tterm-format - use (default) term color formatting\n        --tc, --tnone-format - use clean character output\n        --ts - Skip oks\n        --tgout <dir> - set (good) .out input directory (default is the same as dir/inputs will be still found in dir location/use when .out and .in are in separate locations)\n        --terr <dir> - set .err output directory (default is /out)\n        --tout <dir> set output .out file directory (default is /out)\n        --tf - proceed even if directories do not exists etc.\n        --tt - automatically create missing .out files using program output\n        --tn - skip after-testing summary\n        --ta - abort after +5 errors\n        -help - display this help\n        --tm - use minimalistic mode (less output)\n        --tmm - use very minimalistic mode (even less output)\n        --tmmm - use the most minimialistic mode (only file names are shown)\n\n"; exit 0 ;;
-    --help) printf "\nUsage:\n     test  <prog> <dir> [flags]\n      <prog> is path to the executable, you want to test\n      <dir> is the path to folder containing .in/.out files\n      All available flags are:\n        --tsty-format - use !error!, !info! etc. output format\n        --tterm-format - use (default) term color formatting\n        --tc, --tnone-format - use clean character output\n        --ts - Skip oks\n        --tgout <dir> - set (good) .out input directory (default is the same as dir/inputs will be still found in dir location/use when .out and .in are in separate locations)\n        --terr <dir> - set .err output directory (default is /out)\n        --tout <dir> set output .out file directory (default is /out)\n        --tf - proceed even if directories do not exists etc.\n        --tt - automatically create missing .out files using program output\n        --tn - skip after-testing summary\n        --ta - abort after +5 errors\n        -help - display this help\n        --tm - use minimalistic mode (less output)\n        --tmm - use very minimalistic mode (even less output)\n        --tmmm - use the most minimialistic mode (only file names are shown)\n\n"; exit 0 ;;
+    -help) printf "\nUsage:\n     test  <prog> <dir> [flags]\n      <prog> is path to the executable, you want to test\n      <dir> is the path to folder containing .in/.out files\n      All available flags are:\n        --tsty-format - use !error!, !info! etc. output format\n        --tterm-format - use (default) term color formatting\n        --tc, --tnone-format - use clean character output\n        --ts - Skip oks\n        --tgout <dir> - set (good) .out input directory (default is the same as dir/inputs will be still found in dir location/use when .out and .in are in separate locations)\n        --tgerr <dir> same as --tgout but says where to find good .err files (by default nonempty .err file means error)\n        --terr <dir> - set .err output directory (default is /out)\n        --tout <dir> set output .out file directory (default is /out)\n        --tf - proceed even if directories do not exists etc.\n        --tt - automatically create missing .out files using program output\n        --tn - skip after-testing summary\n        --ta - abort after +5 errors\n        -help - display this help\n        --tm - use minimalistic mode (less output)\n        --tmm - use very minimalistic mode (even less output)\n        --tmmm - use the most minimialistic mode (only file names are shown)\n\n"; exit 0 ;;
+    --help) printf "\nUsage:\n     test  <prog> <dir> [flags]\n      <prog> is path to the executable, you want to test\n      <dir> is the path to folder containing .in/.out files\n      All available flags are:\n        --tsty-format - use !error!, !info! etc. output format\n        --tterm-format - use (default) term color formatting\n        --tc, --tnone-format - use clean character output\n        --ts - Skip oks\n        --tgout <dir> - set (good) .out input directory (default is the same as dir/inputs will be still found in dir location/use when .out and .in are in separate locations)\n        --tgerr <dir> same as --tgout but says where to find good .err files (by default nonempty .err file means error)\n        --terr <dir> - set .err output directory (default is /out)\n        --tout <dir> set output .out file directory (default is /out)\n        --tf - proceed even if directories do not exists etc.\n        --tt - automatically create missing .out files using program output\n        --tn - skip after-testing summary\n        --ta - abort after +5 errors\n        -help - display this help\n        --tm - use minimalistic mode (less output)\n        --tmm - use very minimalistic mode (even less output)\n        --tmmm - use the most minimialistic mode (only file names are shown)\n\n"; exit 0 ;;
     *) {
       if [[ $1 == -* ]]; then
         input_prog_flag_acc="$input_prog_flag_acc $1"
@@ -230,21 +231,60 @@ do
       #TEST_RESULTS
       input_file=$(basename $input_file_path)
       good_out_path=$flag_good_out_path/${input_file/.in/.out}
+      good_err_path=$flag_good_err_path/${input_file/.in/.err}
+
       out_path=$flag_out_path/${input_file/.in/.out}
       err_path=$flag_err_path/${input_file/.in/.err}
+
       r=$($param_prog $input_prog_flag_acc < $input_file_path 1> $out_path 2> $err_path)
-      if [ -s "$err_path" ]; then
-        err_index=$((err_index+1))
-        err_message=$(cat "$err_path")
-        if [[ $flag_extreamely_minimalistic = 'false' ]]; then
-          printf  "${B_ERR}$input_file${E_ERR}\n"
-        else
-          if [[ $flag_very_minimal = 'false' ]]; then
-            printf  "%-35s  %s\n" "${B_DEBUG}[$file_index/$file_count]${E_DEBUG}  $input_file" "${B_ERR}[ERR] Error at stderr${E_ERR}"
+
+      was_error=false
+      print_error_by_default=true
+      if [[ "$flag_good_err_path" != "" ]]; then
+        diff=$(diff --text --minimal --suppress-blank-empty --strip-trailing-cr --ignore-case --ignore-tab-expansion --ignore-trailing-space --ignore-space-change --ignore-all-space --ignore-blank-lines $err_path $good_err_path)
+        if [[ $diff != '' ]]; then
+          was_error=true
+          print_error_by_default=false
+
+          err_index=$((err_index+1))
+          err_message=$diff
+          err_message=$(echo -en "$err_message" | sed "s/^/ $B_ERR\|$E_ERR  /g")
+
+          if [[ $flag_extreamely_minimalistic = 'false' ]]; then
+            printf  "%-35s  %s\n" "${B_DEBUG}[$file_index/$file_count]${E_DEBUG}  $err_path" "${B_ERR}[ERR] Non matching err-output${E_ERR}"
           else
-            printf  "%-35s  %s\n" "${B_DEBUG}[$file_index/$file_count]${E_DEBUG}  $input_file" "${B_ERR}[ERR] Error at stderr${E_ERR}"
-            err_message=$(echo -en "$err_message" | sed "s/^/ $B_ERR\|$E_ERR  /g")
-            printf  "$err_message\n"
+            printf  "${B_ERR}$err_path${E_ERR}\n"
+          fi
+
+          if [[ $flag_very_minimal = 'false' ]]; then
+            # We dont want this
+            if [[ 'true' = 'false' ]]; then
+              printf  "\n  ${B_ERR}_${E_ERR}  \n$err_message\n ${B_ERR}|_${E_ERR}  \n"
+            else
+              printf  "$err_message\n"
+            fi
+          fi
+
+        fi
+      else
+        if [ -s "$err_path" ]; then
+          was_error=true
+        fi
+      fi
+      if [[ "$was_error" = "true" ]]; then
+        if [[ "$print_error_by_default" = "true" ]]; then
+          err_index=$((err_index+1))
+          err_message=$(cat "$err_path")
+          if [[ $flag_extreamely_minimalistic = 'false' ]]; then
+            printf  "${B_ERR}$input_file${E_ERR}\n"
+          else
+            if [[ $flag_very_minimal = 'false' ]]; then
+              printf  "%-35s  %s\n" "${B_DEBUG}[$file_index/$file_count]${E_DEBUG}  $input_file" "${B_ERR}[ERR] Error at stderr${E_ERR}"
+            else
+              printf  "%-35s  %s\n" "${B_DEBUG}[$file_index/$file_count]${E_DEBUG}  $input_file" "${B_ERR}[ERR] Error at stderr${E_ERR}"
+              err_message=$(echo -en "$err_message" | sed "s/^/ $B_ERR\|$E_ERR  /g")
+              printf  "$err_message\n"
+            fi
           fi
         fi
       else

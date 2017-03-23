@@ -14,7 +14,8 @@ const incrTrees IncrTrees = {
   .getRightmostChild = incrTreeGetRightmostChild,
   .printTree = incrTreePrint,
   .splitNode = incrTreeSplitNode,
-  .deleteSubtree = incrTreeDeleteSubtree
+  .deleteSubtree = incrTreeDeleteSubtree,
+  .size = incrTreeGetSize
 };
 
 incrTree incrTreeNew() {
@@ -62,4 +63,8 @@ void incrTreeSplitNode(incrTree t, int parent, int splitter) {
 void incrTreeDeleteSubtree(incrTree t, int number) {
   if(t==NULL) return;
   Trees.deleteSubtree(t->t, number);
+}
+
+int incrTreeGetSize(incrTree t) {
+  return Trees.size(t->t);
 }

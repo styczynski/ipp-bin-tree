@@ -8,9 +8,9 @@
 
 typedef struct treeInParser treeInParser;
 
-int treeInParse(incrTree t, char* command, ...);
+int treeInParse(incrTree t, int vmode, char* command, ...);
 void treeInLogDebug(incrTree t);
-int treeInReadCommand(incrTree t);
+int treeInReadCommand(incrTree t, int vmode);
 void debugInfoParser(const char* command, const char* format, ...);
 
 #endif

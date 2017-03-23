@@ -21,6 +21,7 @@ struct incrTrees {
   void (*printTree)(incrTree);
   void (*splitNode)(incrTree, int, int);
   void (*deleteSubtree)(incrTree, int);
+  int (*size)(incrTree);
 };
 
 const incrTreeData nullIncrTreeData;
@@ -34,7 +35,7 @@ int incrTreeGetRightmostChild(incrTree t, int number);
 void incrTreePrint(incrTree t);
 void incrTreeSplitNode(incrTree t, int parent, int splitter);
 void incrTreeDeleteSubtree(incrTree t, int);
-
+int incrTreeGetSize(incrTree t);
 
 
 #endif
