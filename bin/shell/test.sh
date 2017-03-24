@@ -15,6 +15,7 @@ flag_always_need_good_err=false
 flag_good_err_path=
 input_prog_flag_acc=
 flag_default_require_err_emptyness=false
+flag_always_ignore_stderr=false
 
 flag_out_path=./test_out_temp
 flag_err_path=./test_out_temp
@@ -67,6 +68,7 @@ function print_help {
   printf "        --tterm-format - use (default) term color formatting\n"
   printf "        --tc, --tnone-format - use clean character output\n"
   printf "        --ts - Skip oks\n"
+  printf "        --tierr - Always ignore stderr output.\n"
   printf "        --tgout <dir> - set (good) .out input directory (default is the same as dir/inputs will be still found in dir location/use when .out and .in are in separate locations)\n"
   printf "        --tgerr <dir> same as --tgout but says where to find good .err files (by default nonempty .err file means error)\n"
   printf "        --terr <dir> - set .err output directory (default is /out)\n"
@@ -104,7 +106,8 @@ while test $# != 0
 do
     if [[ ${tflags_loading_enabled} = 'true' ]]; then
       case "$1" in
-      ---tdefault-no-err) flag_default_require_err_emptyness=true ;;
+      --tierr) flag_always_ignore_stderr=true ;;
+      --tdefault-no-err) flag_default_require_err_emptyness=true ;;
       --te) flag_default_require_err_emptyness=true ;;
       --tflags) tflags_always_load_all=true ;;
       --tneed-err) flag_always_need_good_err=true ;;
@@ -210,11 +213,31 @@ if [[ ${flag_force} = 'false' ]]; then
     exit 1
   fi
   if [[ $param_dir = '' ]]; then
-    printf "${B_ERR}Input directory was not given. (parameter <input_dir> is missing)${E_ERR}\n"
-    printf "${B_ERR}Usage: test <prog> <input_dir> [flags]${E_ERR}\n"
-    printf "${B_DEBUG}Use -f option to forcefully proceed.${E_DEBUG}\n"
-    clean_temp
-    exit 1
+    # USE AUTOFIND
+
+    #find . -type f -name "*.txt" -printf '%h\n' | sort | uniq
+    best_test_dir=$(find . -type f -name "*.in" -printf '%h\n' | sort | uniq -c | sort -k 1 -r | awk  '{print $2}' | head -n 1)
+
+    if [[ ${best_test_dir} = '' ]]; then
+      printf "${B_ERR}Input directory was not given. (parameter <input_dir> is missing)${E_ERR}\n"
+      printf "${B_ERR}Usage: test <prog> <input_dir> [flags]${E_ERR}\n"
+      printf "${B_DEBUG}Use -f option to forcefully proceed.${E_DEBUG}\n"
+      clean_temp
+      exit 1
+    else
+      #printf "${B_WARN}Input directory was not given. (parameter <input_dir> is missing)${E_WARN}\n"
+      printf "${B_DEBUG}Autodected \'$best_test_dir\' as best test directory. Using it.${E_DEBUG}\n"
+      param_dir="$best_test_dir"
+      if [[ "$flag_good_out_path" = "" ]]; then
+        flag_good_out_path="$param_dir"
+      fi
+    fi
+
+    #printf "${B_ERR}Input directory was not given. (parameter <input_dir> is missing)${E_ERR}\n"
+    #printf "${B_ERR}Usage: test <prog> <input_dir> [flags]${E_ERR}\n"
+    #printf "${B_DEBUG}Use -f option to forcefully proceed.${E_DEBUG}\n"
+    #clean_temp
+    #exit 1
   fi
   if [[ -d $param_dir ]]; then
     echo -en ""
@@ -317,76 +340,80 @@ do
       out_path=$flag_out_path/${input_file/.in/.out}
       err_path=$flag_err_path/${input_file/.in/.err}
 
+
       r=$($param_prog $input_prog_flag_acc < $input_file_path 1> $out_path 2> $err_path)
 
       was_error=false
       print_error_by_default=true
-      if [[ "$flag_good_err_path" != "" ]]; then
+      if [[ "$flag_always_ignore_stderr" = "false" ]]; then
+        if [[ "$flag_good_err_path" != "" ]]; then
 
-        if [ -s "$good_err_path" ]; then
-          diff=$(diff --text --minimal --suppress-blank-empty --strip-trailing-cr --ignore-case --ignore-tab-expansion --ignore-trailing-space --ignore-space-change --ignore-all-space --ignore-blank-lines $err_path $good_err_path)
-          if [[ $diff != '' ]]; then
-            was_error=true
-            print_error_by_default=false
+          if [ -s "$good_err_path" ]; then
+            diff=$(diff --text --minimal --suppress-blank-empty --strip-trailing-cr --ignore-case --ignore-tab-expansion --ignore-trailing-space --ignore-space-change --ignore-all-space --ignore-blank-lines $err_path $good_err_path)
+            if [[ $diff != '' ]]; then
+              was_error=true
+              print_error_by_default=false
 
-            err_index=$((err_index+1))
-            err_message=$diff
-            err_message=$(echo -en "$err_message" | sed "s/^/ $B_ERR\|$E_ERR  /g")
+              err_index=$((err_index+1))
+              err_message=$diff
+              err_message=$(echo -en "$err_message" | sed "s/^/ $B_ERR\|$E_ERR  /g")
 
-            if [[ $flag_extreamely_minimalistic = 'false' ]]; then
-              printf  "%-35s  %s\n" "${B_DEBUG}[$file_index/$file_count]${E_DEBUG}  $err_path" "${B_ERR}[ERR] Non matching err-output${E_ERR}"
-            else
-              printf  "${B_ERR}$err_path${E_ERR}\n"
-            fi
-
-            if [[ $flag_very_minimal = 'false' ]]; then
-              # We dont want this
-              if [[ 'true' = 'false' ]]; then
-                printf  "\n  ${B_ERR}_${E_ERR}  \n$err_message\n ${B_ERR}|_${E_ERR}  \n"
+              if [[ $flag_extreamely_minimalistic = 'false' ]]; then
+                printf  "%-35s  %s\n" "${B_DEBUG}[$file_index/$file_count]${E_DEBUG}  $err_path" "${B_ERR}[ERR] Non matching err-output${E_ERR}"
               else
-                printf  "$err_message\n"
+                printf  "${B_ERR}$err_path${E_ERR}\n"
               fi
-            fi
-          fi
 
-        else
-
-
-          if [[ ${flag_always_need_good_err} = 'true' ]]; then
-
-            warn_index=$((warn_index+1))
-            if [[ ${flag_auto_test_creation} = 'true' ]]; then
-              not_exists_but_created_index=$((not_exists_but_created_index+1))
-              r=$($param_prog $input_prog_flag_acc < $input_file_path 2> $good_err_path 1> /dev/null)
-            else
-              not_exists_index=$((not_exists_index+1))
-              if [[ "$not_exists_index" -lt "10" ]]; then
-                if [[ ${flag_extreamely_minimalistic} = 'true' ]]; then
-                  printf  "${B_WARN}$good_err_path${E_WARN}\n"
+              if [[ $flag_very_minimal = 'false' ]]; then
+                # We dont want this
+                if [[ 'true' = 'false' ]]; then
+                  printf  "\n  ${B_ERR}_${E_ERR}  \n$err_message\n ${B_ERR}|_${E_ERR}  \n"
                 else
-                  printf  "%-35s  %s\n" "${B_DEBUG}[$file_index/$file_count]${E_DEBUG}  $input_file" "${B_WARN}[?] $good_err_path not exists${E_WARN}"
+                  printf  "$err_message\n"
                 fi
               fi
             fi
 
           else
-            if [[ "$flag_default_require_err_emptyness" = "true" ]]; then
-              if [ -s "$err_path" ]; then
-                was_error=true
+
+
+            if [[ ${flag_always_need_good_err} = 'true' ]]; then
+
+              warn_index=$((warn_index+1))
+              if [[ ${flag_auto_test_creation} = 'true' ]]; then
+                not_exists_but_created_index=$((not_exists_but_created_index+1))
+                r=$($param_prog $input_prog_flag_acc < $input_file_path 2> $good_err_path 1> /dev/null)
+              else
+                not_exists_index=$((not_exists_index+1))
+                if [[ "$not_exists_index" -lt "10" ]]; then
+                  if [[ ${flag_extreamely_minimalistic} = 'true' ]]; then
+                    printf  "${B_WARN}$good_err_path${E_WARN}\n"
+                  else
+                    printf  "%-35s  %s\n" "${B_DEBUG}[$file_index/$file_count]${E_DEBUG}  $input_file" "${B_WARN}[?] $good_err_path not exists${E_WARN}"
+                  fi
+                fi
               fi
+
             else
-              # ERR NOT EXISTS
-              # DO NOTHING BY DEFAULT
-              echo -en ""
+              if [[ "$flag_default_require_err_emptyness" = "true" ]]; then
+                if [ -s "$err_path" ]; then
+                  was_error=true
+                fi
+              else
+                # ERR NOT EXISTS
+                # DO NOTHING BY DEFAULT
+                echo -en ""
+              fi
             fi
+
           fi
 
+        else
+          if [ -s "$err_path" ]; then
+            was_error=true
+          fi
         fi
 
-      else
-        if [ -s "$err_path" ]; then
-          was_error=true
-        fi
       fi
       if [[ "$was_error" = "true" ]]; then
         if [[ "$print_error_by_default" = "true" ]]; then
@@ -404,6 +431,14 @@ do
             fi
           fi
         fi
+
+        if [[ ${flag_out_temp} = 'true' ]]; then
+          rm -f -r $flag_out_path/*
+        fi
+        if [[ ${flag_err_temp} = 'true' ]]; then
+          rm -f -r $flag_err_path/*
+        fi
+
       else
 
         if [[ "$err_index" -gt 5 ]]; then
@@ -461,7 +496,14 @@ do
           fi
         fi
       fi
-    file_index=$((file_index+1))
+      file_index=$((file_index+1))
+    fi
+
+    if [[ ${flag_out_temp} = 'true' ]]; then
+      rm -f -r $flag_out_path/*
+    fi
+    if [[ ${flag_err_temp} = 'true' ]]; then
+      rm -f -r $flag_err_path/*
     fi
 done
 
