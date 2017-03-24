@@ -1,12 +1,70 @@
+/*
+*  Tree structure implementation based on bidirectional lists (C99 standard)
+*  Usage:
+*     #include <tree.h>
+*      ...
+*     tree l = Trees.new();
+*
+*  All interface sould be accessed through Trees constant.
+*
+*  MIT LICENSE
+*  @Piotr Styczyński 2017
+*/
 #include "utils.h"
 #include "list.h"
 #include "tree.h"
-#include "iterator.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
 #include <stdarg.h>
 
+/*
+* Initial size of reference table
+*/
+#define TREE_REF_TAB_INITIAL_SIZE 107
+
+/*
+* Define debug symbol
+*/
+#define TREE_DEBUG DBG debugInfoTree
+
+/*
+* Null values used by memory allocation
+*/
+const treeNode* nullTreeNodePtr = NULL;
+
+const treeRoot nullTreeRoot = {
+  .root = NULL,
+  .refTab = NULL,
+  .refTabSize = 0
+};
+
+const treeNodeValue nullTreeNodeValue = {
+  .parent = NULL,
+  .children = NULL,
+  .number = 0
+};
+
+/*
+* Extract value of the node from node pointer.
+*/
+treeNodeValue* treeGetNodeValue(treeNode* node) {
+  if(node == NULL) return NULL;
+  return (treeNodeValue*)(node->value);
+}
+
+/*
+* Used for debbuging purposes
+* Use like printf:
+*
+*   debugInfoTree(node, "formatting d=%d", 42);
+*
+* NOTICE: This function should NOT BE used directly.
+*         To print debug information - macro TREE_DEBUG is used.
+*         Works like debugInfoTree:
+*         TREE_DEBUG (node, "d = %d", 42);
+*
+*/
 void debugInfoTree(treeNode* node, const char* format, ...) {
   treeNodeValue* value = treeGetNodeValue(node);
   void* children = NULL;
@@ -25,37 +83,9 @@ void debugInfoTree(treeNode* node, const char* format, ...) {
   va_end (arg);
 }
 
-const treeNode* nullTreeNodePtr = NULL;
-
-const trees Trees = {
-  .new = treeNew,
-  .free = treeFree,
-  .addNode = treeAddNode,
-  .removeNode = treeRemoveNode,
-  .getRightmostChild = treeGetRightmostChild,
-  .printTree = printTree,
-  .splitNode = treeSplitNode,
-  .deleteSubtree = treeDeleteSubtree,
-  .size = treeGetSize
-};
-
-const treeRoot nullTreeRoot = {
-  .root = NULL,
-  .refTab = NULL,
-  .refTabSize = 0
-};
-
-const treeNodeValue nullTreeNodeValue = {
-  .parent = NULL,
-  .children = NULL,
-  .number = 0
-};
-
-treeNodeValue* treeGetNodeValue(treeNode* node) {
-  if(node == NULL) return NULL;
-  return (treeNodeValue*)(node->value);
-}
-
+/*
+* Obtain node pointer from its number.
+*/
 treeNode* treeFindNode(tree t, int number) {
   if(t==NULL) return NULL;
   if(number<0) {
@@ -65,6 +95,13 @@ treeNode* treeFindNode(tree t, int number) {
   return (t->refTab)[number];
 }
 
+/*
+* Save pointer to the node in the reference table.
+* This technique is used to provide O(1) access time.
+*
+* If the reference table is too small it's reallocated
+* with new size eual to 1.5 x (current size)
+*/
 void treePutRef(tree t, int number, treeNode* node) {
   if(t == NULL) return;
   if(t->refTab == NULL) return;
@@ -84,6 +121,10 @@ void treePutRef(tree t, int number, treeNode* node) {
   (t->refTab)[number] = node;
 }
 
+/*
+* Create new tree node value object.
+* (all values should be paired with corelated treeNodes)
+*/
 treeNodeValue* treeNewNodeValue(tree t, int number) {
   treeNodeValue* ret = malloc(sizeof(nullTreeNodeValue));
   ret->number = number;
@@ -93,6 +134,9 @@ treeNodeValue* treeNewNodeValue(tree t, int number) {
   return ret;
 }
 
+/*
+* Create new tree node and fill automatically its value pointer.
+*/
 treeNode* treeNewNode(tree t, int number) {
   treeNode* node = Lists.newDetachedElement();
   node->value = (void*)treeNewNodeValue(t, number);
@@ -100,6 +144,9 @@ treeNode* treeNewNode(tree t, int number) {
   return node;
 }
 
+/*
+* Allocate new tree
+*/
 tree treeNew() {
   tree t = malloc(sizeof(nullTreeRoot));
   t->root = NULL;
@@ -115,6 +162,10 @@ tree treeNew() {
   return t;
 }
 
+/*
+* Add new node <child> as the child of already
+* existing node <parent>
+*/
 void treeAddNode(tree t, int parent, int child) {
   if(t == NULL) return;
   TREE_DEBUG (NULL, " ADD NODE parent:%d child:%d", parent, child);
@@ -136,6 +187,10 @@ void treeAddNode(tree t, int parent, int child) {
   }
 }
 
+/*
+* Get rightmost direct child of a given node.
+* All tree numbers must be non-negative.
+*/
 int treeGetRightmostChild(tree t, int number) {
   if(t == NULL) return -1;
   treeNode* node = treeFindNode(t, number);
@@ -153,6 +208,16 @@ int treeGetRightmostChild(tree t, int number) {
   return -1;
 }
 
+/*
+* Prints tree node representation.
+* The information printed to stdout looks like following:
+*
+* Node node_value - node_pointer [value_pointer] <pointer_to_node_children_list> | <pointer_to_parent> {
+*       ... Children nodes information ...
+* }
+*
+* If there's no children curly brackets are removed.
+*/
 void printTreeNode(treeNode* node, int rlevel, int printToplevelLabel) {
   if(node == NULL) printf("NULL");
   if(printToplevelLabel){
@@ -165,7 +230,7 @@ void printTreeNode(treeNode* node, int rlevel, int printToplevelLabel) {
     if(printToplevelLabel){
       printf("Node %d - %p: [%p] <%p> | %p {\n", nodeValue->number, node, nodeValue->children, nodeValue, nodeValue->parent );fflush(stdout);
     }
-    loop_list(nodeValue->children) {
+    loop_list(nodeValue->children, it) {
       printTreeNode((treeNode*)it, rlevel+1, 1);fflush(stdout);
     }
     if(printToplevelLabel) {
@@ -178,6 +243,9 @@ void printTreeNode(treeNode* node, int rlevel, int printToplevelLabel) {
 
 }
 
+/*
+* Prints entire tree to stdout.
+*/
 void printTree(tree t) {
   if(t==NULL) {
     printf("Tree: NULL");
@@ -197,6 +265,12 @@ void printTree(tree t) {
   printf("}\n");
 }
 
+/*
+* Update parent pointer references in children of <node>
+* This function should be called each time the children list
+* end are changed (remove, swaped, new one created) to ensure
+* parent pointers are valid among all tree nodes.
+*/
 void treeUpdateChildrenUpwardRefs(treeNode* node) {
   TREE_DEBUG (node, " UPDATE REFS");
   if(node == NULL) return;
@@ -211,6 +285,10 @@ void treeUpdateChildrenUpwardRefs(treeNode* node) {
   TREE_DEBUG (node, " UPDATE REFS DONE");
 }
 
+/*
+* Remove node with given number.
+* All tree numbers must be non-negative.
+*/
 void treeRemoveNode(tree t, int number) {
   if(t == NULL) return;
   if(t->root == NULL) return;
@@ -253,6 +331,13 @@ void treeRemoveNode(tree t, int number) {
   treePutRef(t, number, NULL);
 }
 
+/*
+* Split tree node.
+* Splitting means that all right neighbours of <splitter>
+* are now a children of new <node> node added on the right
+* side of <spitter>
+* All tree numbers must be non-negative.
+*/
 void treeSplitNode(tree t, int parent, int splitNode, int child) {
   treeNode* parentNode = treeFindNode(t, parent);
   treeNode* splitingNode = treeFindNode(t, splitNode);
@@ -276,11 +361,14 @@ void treeSplitNode(tree t, int parent, int splitNode, int child) {
   treeUpdateChildrenUpwardRefs(parentNode);
 }
 
+/*
+* Deallocates value objects for node recursively
+*/
 void treeDeleteNodeValueRec(tree t, treeNodeValue* value) {
   if(value == NULL) return;
   treePutRef(t, value->number, NULL);
   TREE_DEBUG (NULL, " FREE NODE VALUE -> BEGIN %p", value);
-  loop_list(value->children) {
+  loop_list(value->children, it) {
     TREE_DEBUG (NULL, " FREE NODE VALUE (RECURSE INTO)----> %p", value);
     treeDeleteNodeValueRec(t, treeGetNodeValue(it));
   }
@@ -293,6 +381,9 @@ void treeDeleteNodeValueRec(tree t, treeNodeValue* value) {
   TREE_DEBUG (NULL, " FREE NODE VALUE END");
 }
 
+/*
+* Removes <node> and all its children recursively.
+*/
 void treeDeleteNodeSubtree(tree t, treeNode* node) {
   if(t == NULL) return;
   if(t->root == NULL) return;
@@ -329,7 +420,9 @@ void treeDeleteNodeSubtree(tree t, treeNode* node) {
   TREE_DEBUG (NULL, " DONE REMOVING NODE-SUBTREE EXIT()");
 }
 
-
+/*
+* Removes node and all its children recursively.
+*/
 void treeDeleteSubtree(tree t, int number) {
   if(t == NULL) return;
   if(t->root == NULL) return;
@@ -338,6 +431,9 @@ void treeDeleteSubtree(tree t, int number) {
   treeDeleteNodeSubtree(t, node);
 }
 
+/*
+* Free all memory allocated by tree.
+*/
 void treeFree(tree t) {
   TREE_DEBUG (NULL, " FREE TREE");
   if(t == NULL) return;
@@ -347,7 +443,27 @@ void treeFree(tree t) {
   free(t);
 }
 
+/*
+* Measure number of nodes in a tree.
+*
+* NOTICE: Works in O(1) time and memory
+*/
 int treeGetSize(tree t) {
   if(t == NULL) return 0;
   return t->size;
 }
+
+/*
+* Trees interface
+*/
+const trees Trees = {
+  .new = treeNew,
+  .free = treeFree,
+  .addNode = treeAddNode,
+  .removeNode = treeRemoveNode,
+  .getRightmostChild = treeGetRightmostChild,
+  .printTree = printTree,
+  .splitNode = treeSplitNode,
+  .deleteSubtree = treeDeleteSubtree,
+  .size = treeGetSize
+};

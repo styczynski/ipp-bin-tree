@@ -1,3 +1,15 @@
+/*
+*  Tree structure implementation based on bidirectional lists (C99 standard)
+*  Usage:
+*     #include <tree.h>
+*      ...
+*     tree l = Trees.new();
+*
+*  All interface sould be accessed through Trees constant.
+*
+*  MIT LICENSE
+*  @Piotr Styczyński 2017
+*/
 #include "list.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -5,33 +17,88 @@
 #ifndef XTREE_TREE_H__
 #define XTREE_TREE_H__
 
-#define TREE_REF_TAB_INITIAL_SIZE 107
-#define TREE_DEBUG DBG debugInfoTree
-
+/*
+* Implementation data types declarations.
+*/
 typedef struct treeNodeValue treeNodeValue;
 typedef struct treeRoot treeRoot;
 typedef treeRoot* tree;
 typedef listNode treeNode;
 typedef struct trees trees;
 
+/*
+* Interface of trees
+*/
 struct trees {
-  tree (*new)();
-  void (*free)(tree);
-  void (*addNode)(tree, int, int);
-  void (*removeNode)(tree, int);
-  int (*getRightmostChild)(tree, int);
-  void (*printTree)(tree);
-  void (*splitNode)(tree, int, int, int);
-  void (*deleteSubtree)(tree, int);
-  int (*size)(tree);
+  /*
+  * Create new tree with -1 root element.
+  * All trees must be then freed with Trees.free(tree);
+  *
+  */
+  tree (*new)( );
+
+  /*
+  * Destroy given tree freeing up memory.
+  */
+  void (*free)( tree t );
+
+  /*
+  * Add new node <child> as the child of already
+  * existing node <parent>
+  */
+  void (*addNode)( tree t, int parent, int child );
+
+  /*
+  * Remove node with given number.
+  * All tree numbers must be non-negative.
+  */
+  void (*removeNode)( tree t, int node );
+
+  /*
+  * Get rightmost direct child of a given node.
+  * All tree numbers must be non-negative.
+  */
+  int (*getRightmostChild)( tree t, int );
+
+  /*
+  * Print tree representation to stdout.
+  */
+  void (*printTree)( tree t );
+
+  /*
+  * Split tree node.
+  * Splitting means that all right neighbours of <splitter>
+  * are now a children of new <node> node added on the right
+  * side of <spitter>
+  * All tree numbers must be non-negative.
+  */
+  void (*splitNode)( tree t, int parent, int splitter, int node);
+
+  /*
+  * Removes <node> and all its children recursively.
+  */
+  void (*deleteSubtree)( tree t, int node );
+
+  /*
+  * Obtains the number of nodes in a tree.
+  *
+  * NOTICE: Works in O(1) time and memory.
+  */
+  int (*size)( tree t );
 };
 
+/*
+* Structure representing value of tree node
+*/
 struct treeNodeValue {
   int number;
   list children;
   treeNode* parent;
 };
 
+/*
+* Structure representing root node of tree
+*/
 struct treeRoot {
   treeNode* root;
   treeNode** refTab;
@@ -39,27 +106,9 @@ struct treeRoot {
   int size;
 };
 
-const treeNode* nullTreeNodePtr;
-const treeNodeValue nullTreeNodeValue;
-const treeRoot nullTreeRoot;
+/*
+*  Tree interface accessor object
+*/
 const trees Trees;
-
-treeNodeValue* treeGetNodeValue(treeNode* node);
-treeNodeValue* treeNewNodeValue(tree t, int number);
-treeNode* treeNewNode(tree t, int number);
-treeNode* treeFindNode(tree t, int number);
-tree treeNew();
-void treeFree(tree t);
-void treeAddNode(tree t, int parent, int child);
-void treeRemoveNode(tree t, int number);
-treeNode* treeNodeGetRightmost(treeNode* node);
-int treeGetRightmostChild(tree t, int number);
-void printTreeNode(treeNode* node, int rlevel, int printToplevelLabel);
-void printTree(tree t);
-void treeUpdateChildrenUpwardRefs(treeNode* node);
-void treeSplitNode(tree t, int parent, int splitNode, int child);
-void treeDeleteSubtree(tree t, int number);
-void debugInfoTree(treeNode* node, const char* format, ...);
-int treeGetSize(tree t);
 
 #endif

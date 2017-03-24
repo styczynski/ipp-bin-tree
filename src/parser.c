@@ -1,19 +1,45 @@
+/*
+*  Parser for testing list/trees (C99 standard)
+*
+*  Parser input command are each in new line.
+*  And they can be one of the:
+*
+*  ADD_NODE <k:node>                        -> Adds new node to tree
+*  RIGHTMOST_CHILD <k:node>                 -> Removes given node from tree
+*  DELETE_NODE <k:node>                     -> Deletes given node
+*  DELETE_SUBTREE <k:node>                  -> Delete recursively given node
+*  SPLIT_NODE <parent:int> <splitter:int>   -> Splits node
+*
+*  For operation details see: <incremental_tree.h>
+*
+*  MIT LICENSE
+*  @Piotr Styczyński 2017
+*/
 #include "utils.h"
 #include "parser.h"
 #include <stdarg.h>
 #include <string.h>
 
-void debugInfoParser(const char* command, const char* format, ...) {
+/*
+* Function logging debug info
+*/
+void debugInfoParser(const char* format, ...) {
   va_list arg;
   va_start (arg, format);
   debugInfo(format, " PARSER: COMMAND                                  -> ", arg);
   va_end (arg);
 }
 
+/*
+* Function logging numnber of nodes after each operation to stderr.
+*/
 void treeInLogDebug(incrTree t) {
   fprintf(stderr, "NODES: %d\n", IncrTrees.size(t));
 }
 
+/*
+* Parse and execute command.
+*/
 int treeInParse(incrTree t, int vmode, char* command, ...) {
   va_list vl;
   va_start(vl, command);
@@ -75,6 +101,9 @@ int treeInParse(incrTree t, int vmode, char* command, ...) {
   return 1;
 }
 
+/*
+* Read command from stdin and execute it.
+*/
 int treeInReadCommand(incrTree t, int vmode) {
   char command[30];
   int k, w;
@@ -108,3 +137,10 @@ int treeInReadCommand(incrTree t, int vmode) {
   }
   return 0;
 }
+
+/*
+* Parser nterface object. 
+*/
+const treeInParser TreeInParser = {
+  .readAndParse = treeInReadCommand
+};
