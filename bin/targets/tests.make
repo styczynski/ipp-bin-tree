@@ -16,20 +16,20 @@ $(TEMP_DIR)/autotest.cache: $(DIST_DIR)/$(TARGET_NAME)$(EXE)
 	@true
 else
 $(TEMP_DIR)/autotest.cache: $(DIST_DIR)/$(TARGET_NAME)$(EXE)
-	$(ECHO)bash ./bin/shell/test.sh "$(DIST_DIR)/$(TARGET_NAME)$(EXE)" "$(TEST_IN_DIR)" --tgout "$(TEST_OUT_DIR)" --tm --terr "$(TEST_RESULTS_DIR)/err" --tout "$(TEST_RESULTS_DIR)/out" --tterm-format $(subst $(PRM_FLAG_INPUT_SYM),$(PRM_FLAG_OUTPUT_SYM),$(filter-out $@,$(MAKECMDGOALS)))
+	$(ECHO)bash ./bin/shell/test.sh --tgout "$(TEST_OUT_DIR)" --tm --terr "$(TEST_RESULTS_DIR)/err" --tout "$(TEST_RESULTS_DIR)/out" --tterm-format "$(DIST_DIR)/$(TARGET_NAME)$(EXE)" "$(TEST_IN_DIR)" $(subst $(PRM_FLAG_INPUT_SYM),$(PRM_FLAG_OUTPUT_SYM),$(filter-out $@,$(MAKECMDGOALS)))
 	$(ECHO)echo "UPDATED" > $(TEMP_DIR)/autotest.cache
 	$(ECHO)touch $(TEMP_DIR)/autotest.cache
 endif
 else
 $(TEMP_DIR)/autotest.cache: $(DIST_DIR)/$(TARGET_NAME)$(EXE)
-	$(ECHO)bash ./bin/shell/test.sh "$(DIST_DIR)/$(TARGET_NAME)$(EXE)" "$(TEST_IN_DIR)" --tgout "$(TEST_OUT_DIR)" --tm --terr "$(TEST_RESULTS_DIR)/err" --tout "$(TEST_RESULTS_DIR)/out" --tterm-format $(subst $(PRM_FLAG_INPUT_SYM),$(PRM_FLAG_OUTPUT_SYM),$(filter-out $@,$(MAKECMDGOALS)))
+	$(ECHO)bash ./bin/shell/test.sh --tgout "$(TEST_OUT_DIR)" --tm --terr "$(TEST_RESULTS_DIR)/err" --tout "$(TEST_RESULTS_DIR)/out" --tterm-format "$(DIST_DIR)/$(TARGET_NAME)$(EXE)" "$(TEST_IN_DIR)" $(subst $(PRM_FLAG_INPUT_SYM),$(PRM_FLAG_OUTPUT_SYM),$(filter-out $@,$(MAKECMDGOALS)))
 	$(ECHO)echo "UPDATED" > $(TEMP_DIR)/autotest.cache
 	$(ECHO)touch $(TEMP_DIR)/autotest.cache
 endif
 
 ifeq (filein,$(SUPPORT_TESTS))
 test: all
-	$(ECHO)bash ./bin/shell/test.sh "$(DIST_DIR)/$(TARGET_NAME)$(EXE)" "$(TEST_IN_DIR)" --tgout "$(TEST_OUT_DIR)" --terr "$(TEST_RESULTS_DIR)/err" --tout "$(TEST_RESULTS_DIR)/out" --tterm-format $(subst $(PRM_FLAG_INPUT_SYM),$(PRM_FLAG_OUTPUT_SYM),$(filter-out $@,$(MAKECMDGOALS)))
+	$(ECHO)bash ./bin/shell/test.sh --tgout "$(TEST_OUT_DIR)" --terr "$(TEST_RESULTS_DIR)/err" --tout "$(TEST_RESULTS_DIR)/out" --tterm-format  "$(DIST_DIR)/$(TARGET_NAME)$(EXE)" "$(TEST_IN_DIR)" $(subst $(PRM_FLAG_INPUT_SYM),$(PRM_FLAG_OUTPUT_SYM),$(filter-out $@,$(MAKECMDGOALS)))
 else
 ifeq (command,$(SUPPORT_TESTS))
 test: all

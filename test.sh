@@ -22,8 +22,9 @@ do
 done
 
 if [[ "$flag_v" == "false" ]]; then
-  echo "Use no -v flag"
-  bash ./bin/shell/test.sh "$prog" "$dir" --tgout "$dir" --terr "./tests_results/err" --tout "./tests_results/out" --tterm-format
+  bash ./bin/shell/test.sh  --tgout "$dir" --terr "./tests_results/err" --tout "./tests_results/out" --tterm-format "$prog" "$dir"
 else
-  bash ./bin/shell/test.sh "$prog" "$dir" --tgout "$dir" --tgerr "$dir" --terr "./tests_results/err" --tout "./tests_results/out" --tterm-format -v
+  bash ./bin/shell/test.sh --tgout "$dir" --tgerr "$dir" --terr "./tests_results/err" --tout "./tests_results/out" --tterm-format  "$prog" "$dir" -v
 fi
+
+# bash ./bin/shell/test.sh ./dist/solution ./tests
