@@ -365,7 +365,10 @@ int isListRightSideEnd( listNode* node ) {
 void insertListAt( list tgt, listNode* node, list src ) {
   if(node == NULL) return;
   if(src == NULL) return;
-  if((src->begin == NULL) || (src->end == NULL)) return;
+  if((src->begin == NULL) || (src->end == NULL)) {
+    freeList(src);
+    return;
+  }
   if(node->left == NULL) {
     tgt->begin = src->begin;
 
