@@ -26,8 +26,11 @@
 void debugInfoParser(const char* format, ...) {
   va_list arg;
   va_start (arg, format);
-  debugInfo(format, " PARSER: COMMAND                                  -> ", arg);
+  printf(" PARSER: COMMAND                                  -> ");
+  vfprintf(stdout, format, arg);
   va_end (arg);
+  printf("\n");
+  fflush(stdout);
 }
 
 /*
@@ -139,7 +142,7 @@ int treeInReadCommand(incrTree t, int vmode) {
 }
 
 /*
-* Parser nterface object. 
+* Parser nterface object.
 */
 const treeInParser TreeInParser = {
   .readAndParse = treeInReadCommand

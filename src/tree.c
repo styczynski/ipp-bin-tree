@@ -76,9 +76,16 @@ void debugInfoTree(treeNode* node, const char* format, ...) {
   va_list arg;
   va_start (arg, format);
   if(node == NULL) {
-    debugInfo(format, "                                                  -> ", id, node, value, children);
+    printf("                                                  -> ");
+    vfprintf(stdout, format, arg);
+    printf("\n");
+    fflush(stdout);
   } else {
-    debugInfo(format, " NODE:%d  { %p <%p> [%p] } -> ", id, node, value, children);
+    //debugInfo(format, " NODE:%d  { %p <%p> [%p] } -> ", id, node, value, children, arg);
+    printf(" NODE:%d  { %p <%p> [%p] } -> ", id, node, value, children);
+    vfprintf(stdout, format, arg);
+    printf("\n");
+    fflush(stdout);
   }
   va_end (arg);
 }
@@ -264,7 +271,7 @@ void printTree(tree t) {
     return;
   }
   printf("Tree: {\n");fflush(stdout);
-  printTreeNode(t->root, 1, 0);
+  printTreeNode(t->root, 1, 1);
   printf("}\n");
 }
 
@@ -391,8 +398,8 @@ void treeDeleteNodeSubtree(tree t, treeNode* node) {
   if(t == NULL) return;
   if(t->root == NULL) return;
 
-  treeNodeValue* nodeValue = treeGetNodeValue(node);
   TREE_DEBUG (node, " REMOVE NODE-SUBTREE");
+  treeNodeValue* nodeValue = treeGetNodeValue(node);
   if(nodeValue != NULL) {
 
     if(Lists.isSideElement(node)) {
@@ -419,6 +426,7 @@ void treeDeleteNodeSubtree(tree t, treeNode* node) {
       treeDeleteNodeSubtree(t, child);
     }*/
     treeDeleteNodeValueRec(t, nodeValue);
+    free(node);
   }
   TREE_DEBUG (NULL, " DONE REMOVING NODE-SUBTREE EXIT()");
 }
@@ -441,7 +449,7 @@ void treeFree(tree t) {
   TREE_DEBUG (NULL, " FREE TREE");
   if(t == NULL) return;
   treeDeleteNodeSubtree(t, t->root);
-  //free(t->root);
+  free(t->root);
   free(t->refTab);
   free(t);
 }
