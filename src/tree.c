@@ -426,7 +426,7 @@ void treeDeleteNodeSubtree(tree t, treeNode* node) {
       treeDeleteNodeSubtree(t, child);
     }*/
     treeDeleteNodeValueRec(t, nodeValue);
-    free(node);
+    //free(node);
   }
   TREE_DEBUG (NULL, " DONE REMOVING NODE-SUBTREE EXIT()");
 }
