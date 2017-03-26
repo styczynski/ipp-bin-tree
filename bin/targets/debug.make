@@ -5,7 +5,7 @@
 #
 
 
-ifeq (false,$(REBUILD_AUTO_MODE))
+ifneq (true,$(REBUILD_AUTO_MODE))
 ifeq (true,$(SUPPORT_DEBUG_SYM))
 debug: $(TEMP_DIR) $(DIST_DIR) $(DIST_DIR)/$(TARGET_NAME)$(DBG) sources_noecho
 	$(info <debug>Generated debug symbols.</debug>)

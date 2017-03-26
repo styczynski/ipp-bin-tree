@@ -10,6 +10,11 @@ include ./bin/default.config
 include ./build.config
 include ./bin/paths.make
 
+REBUILD_AUTO_MODE=false
+ifneq (,$(filter rebuildauto,$(MAKECMDGOALS)))
+REBUILD_AUTO_MODE=true
+endif
+
 ifeq (true,$(DEBUG))
 ECHO=(echo __DEBUG_NOTIFICATOR__ > /dev/null) &
 endif

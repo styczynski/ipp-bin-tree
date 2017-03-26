@@ -4,11 +4,6 @@
 # @Piotr Styczyński 2017
 #
 
-REBUILD_AUTO_MODE=false
-ifneq (,$(filter rebuildauto,$(MAKECMDGOALS)))
-REBUILD_AUTO_MODE=true
-endif
-
 rebuild: clean-all $(TEMP_DIR) $(DIST_DIR)
 
 build: $(TEMP_DIR) $(DIST_DIR) sources
