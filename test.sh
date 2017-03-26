@@ -8,20 +8,28 @@
 
 flag_v=false
 
-prog=$1
-shift
-dir=$1
-shift
 
+dir_cnt=0
 while test $# != 0
 do
     case "$1" in
     -v) {
       flag_v=true
     };;
-    *) {
-      echo "Unknown comand option used: $1"
+    -*) {
+      echo "Invalid switch was used: $1"
       exit 1
+    };;
+    *) {
+      if [[ $dir_cnt = 0 ]]; then
+        prog=$1
+      elif [[ $dir_cnt = 1 ]]; then
+	dir=$1
+      else
+        echo "Invalid data among script parameters: $1"
+	exit 1
+      fi
+      dir_cnt=$((dir_cnt+1))
     };;
     esac
     shift
