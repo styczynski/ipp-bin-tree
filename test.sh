@@ -36,7 +36,7 @@ do
 done
 
 if [[ "$flag_v" == "false" ]]; then
-  bash ./bin/shell/test.sh  --tgout "$dir" --terr "./tests_results/err" --tout "./tests_results/out" --tterm-format "$prog" "$dir"
+  bash ./bin/shell/test.sh --tc --tmmm --tgout "$dir" --terr "./tests_results/err" --tout "./tests_results/out"  "$prog" "$dir"
 else
-  bash ./bin/shell/test.sh --tgout "$dir" --tgerr "$dir" --terr "./tests_results/err" --tout "./tests_results/out" --tterm-format  "$prog" "$dir" -v
+  bash ./bin/shell/test.sh --tc --tmmm --tgout "$dir" --tgerr "$dir" --terr "./tests_results/err" --tout "./tests_results/out" "$prog" "$dir" -v
 fi
