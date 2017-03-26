@@ -620,7 +620,7 @@ function run_program {
   fi
 
   if [[ $flag_tools_use_vmemcheck = 'true' ]]; then
-    { valgrind --tool=memcheck $param_prog $input_prog_flag_acc < $input_file_path 1> /dev/null 2> /dev/null ; } > /dev/null 2> ./memcheck.out
+    { valgrind --tool=memcheck $param_prog $input_prog_flag_acc < $input_file_path > /dev/null ; } 2> ./memcheck.out
     leaksReport=$(sed 's/==.*== //' ./memcheck.out | sed -n -e '/LEAK SUMMARY:/,$p' | sed 's/LEAK SUMMARY://' | head -5)
     tooling_additional_test_info="${tooling_additional_test_info}Leaks report:\n${leaksReport}\n"
     rm ./memcheck.out

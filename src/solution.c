@@ -36,6 +36,5 @@ int main(int argc, char **argv) {
     incrTree t = IncrTrees.new();
     while(TreeInParser.readAndParse(t, vmode)) {};
 
-
     return 0;
 }
