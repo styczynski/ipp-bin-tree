@@ -1,8 +1,0 @@
-{
-  "execPath": "gcc",
-  "gccDefaultCFlags": "-Wall -Wextra -std=c99 -Wl,--unresolved-symbols=ignore-in-object-files",
-  "gccDefaultCppFlags": "-Wall -Wextra -std=c99 -Wl,--unresolved-symbols=ignore-in-object-files",
-  "gccErrorLimit": 15,
-  "gccIncludePaths": "",
-  "gccSuppressWarnings": false
-}
