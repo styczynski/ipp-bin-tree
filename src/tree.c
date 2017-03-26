@@ -108,10 +108,13 @@ void treePutRef(tree t, int number, treeNode* node) {
   TREE_DEBUG (node, " PUT REF number: %d", number);
 
   if(number<0) {
+    return;
+  }
+  /*if(number<0) {
     printf("[ERROR] Tried to access %d index refTab\n", number);
     fflush(stdout);
     return;
-  }
+  }*/
   if(number>=(t->refTabSize)) {
     const int newSize = (t->refTabSize)*2 - (t->refTabSize)/2;
     t->refTab = realloc(t->refTab, newSize*sizeof(nullTreeNodePtr));
@@ -438,7 +441,7 @@ void treeFree(tree t) {
   TREE_DEBUG (NULL, " FREE TREE");
   if(t == NULL) return;
   treeDeleteNodeSubtree(t, t->root);
-  free(t->root);
+  //free(t->root);
   free(t->refTab);
   free(t);
 }

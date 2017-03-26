@@ -35,6 +35,7 @@ int main(int argc, char **argv) {
     /* Setup and run parser in continous loop */
     incrTree t = IncrTrees.new();
     while(TreeInParser.readAndParse(t, vmode)) {};
+    IncrTrees.free(t);
 
     return 0;
 }
