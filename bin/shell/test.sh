@@ -1,4 +1,14 @@
 #!/bin/bash
+#
+# General purpose awesome testing-script
+# Used to test program with given .in/.err files
+# Or selected script
+#
+# Usage: type test.sh --help to get some info
+#
+#
+# @Piotr Styczyński 2017
+#
 
 flag_formating=term
 flag_out_path=./out

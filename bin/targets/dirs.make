@@ -1,3 +1,8 @@
+#
+# Make needed directories
+#
+# @Piotr Styczyński 2017
+#
 
 $(TEMP_DIR):
 	$(ECHO)mkdir $(TEMP_DIR)

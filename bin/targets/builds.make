@@ -1,14 +1,19 @@
+#
+# Building commands
+#
+# @Piotr Styczyński 2017
+#
 
 REBUILD_AUTO_MODE=false
 ifneq (,$(filter rebuildauto,$(MAKECMDGOALS)))
 REBUILD_AUTO_MODE=true
 endif
 
-rebuild: clean-all
+rebuild: clean-all $(TEMP_DIR) $(DIST_DIR)
 
-build: sources
+build: $(TEMP_DIR) $(DIST_DIR) sources
 
-all: sources
+all: $(TEMP_DIR) $(DIST_DIR) sources
 
 rebuildauto: sources_noecho $(TEMP_DIR)/autotest.cache
 	@true

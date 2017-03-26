@@ -1,3 +1,8 @@
+#
+# Run program
+#
+# @Piotr Styczyński 2017
+#
 
 ifneq (,$(ON_RUN))
 run:

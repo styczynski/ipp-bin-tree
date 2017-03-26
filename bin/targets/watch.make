@@ -1,5 +1,10 @@
+#
+# Livereload watch command
+#
+# @Piotr Styczyński 2017
+#
 
-ifneq (,$(SUPPORT_WATCH))
+ifeq (true,$(SUPPORT_WATCH))
 watch:
 	$(info <b>Starting autobuilds... watching files</b>)
 	$(info )

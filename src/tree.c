@@ -28,6 +28,27 @@
 */
 #define TREE_DEBUG DBG debugInfoTree
 
+
+/*
+* Structure representing value of tree node
+*/
+struct treeNodeValue {
+  int number;
+  list children;
+  treeNode* parent;
+};
+
+/*
+* Structure representing root node of tree
+*/
+struct treeRoot {
+  treeNode* root;
+  treeNode** refTab;
+  int refTabSize;
+  int size;
+};
+
+
 /*
 * Null values used by memory allocation
 */
@@ -50,7 +71,7 @@ const treeNodeValue nullTreeNodeValue = {
 */
 treeNodeValue* treeGetNodeValue(treeNode* node) {
   if(node == NULL) return NULL;
-  return (treeNodeValue*)(node->value);
+  return (treeNodeValue*)Lists.getValue(node);
 }
 
 /*
@@ -81,7 +102,6 @@ void debugInfoTree(treeNode* node, const char* format, ...) {
     printf("\n");
     fflush(stdout);
   } else {
-    //debugInfo(format, " NODE:%d  { %p <%p> [%p] } -> ", id, node, value, children, arg);
     printf(" NODE:%d  { %p <%p> [%p] } -> ", id, node, value, children);
     vfprintf(stdout, format, arg);
     printf("\n");
@@ -117,11 +137,6 @@ void treePutRef(tree t, int number, treeNode* node) {
   if(number<0) {
     return;
   }
-  /*if(number<0) {
-    printf("[ERROR] Tried to access %d index refTab\n", number);
-    fflush(stdout);
-    return;
-  }*/
   if(number>=(t->refTabSize)) {
     const int newSize = (t->refTabSize)*2 - (t->refTabSize)/2;
     t->refTab = realloc(t->refTab, newSize*sizeof(nullTreeNodePtr));
@@ -149,7 +164,7 @@ treeNodeValue* treeNewNodeValue(tree t, int number) {
 */
 treeNode* treeNewNode(tree t, int number) {
   treeNode* node = Lists.newDetachedElement();
-  node->value = (void*)treeNewNodeValue(t, number);
+  Lists.setValue(node, (void*)treeNewNodeValue(t, number));
   treePutRef(t, number, node);
   return node;
 }
@@ -167,7 +182,7 @@ tree treeNew() {
   }
   t->root = Lists.newDetachedElement();
   t->size = 0;
-  t->root->value = (void*)treeNewNodeValue(t, -1);
+  Lists.setValue(t->root, (void*)treeNewNodeValue(t, -1));
   t->size = 0;
   return t;
 }
@@ -192,8 +207,6 @@ void treeAddNode(tree t, int parent, int child) {
     treeNode* childNode = (treeNode*) Lists.pushBack(parentNodeValue->children, childNodeValue);
     treePutRef(t, child, childNode);
     TREE_DEBUG (t->root, " ADDED NODE -> AS NORMAL");
-    //treeNode* childNode = treeNewNode(t, child);
-    //Lists.pushBack(treeGetNodeValue(parentNode)->children, treeGetNodeValue(childNode));
   }
 }
 
@@ -321,6 +334,7 @@ void treeRemoveNode(tree t, int number) {
         if(parentNodeValue != NULL) {
           TREE_DEBUG (node, " INSERT LIST AT NODE, PARENT.CHILDREN = %p", parentNodeValue->children);
           Lists.insertListAt(parentNodeValue->children, node, nodeValue->children);
+          Lists.free(nodeValue->children);
           TREE_DEBUG (node, " DETACH ELEMENT AT NODE, PARENT.CHILDREN = %p", parentNodeValue->children);
           Lists.detachElement(parentNodeValue->children, node);
         }
@@ -329,6 +343,7 @@ void treeRemoveNode(tree t, int number) {
         TREE_DEBUG (node, " REMOVE NODE - NON-SIDED branch");
         TREE_DEBUG (node, " INSERT LIST AT NODE");
         Lists.insertListAt(NULL, node, nodeValue->children);
+        Lists.free(nodeValue->children);
         TREE_DEBUG (node, "DETACH ELEMENT AT NODE");
         Lists.detachElement(NULL, node);
       }
@@ -416,17 +431,11 @@ void treeDeleteNodeSubtree(tree t, treeNode* node) {
     } else {
       TREE_DEBUG (node, " REMOVE NODE-SUBTREE - NON-SIDED branch");
       TREE_DEBUG (node, " INSERT LIST AT NODE");
-      //Lists.insertListAt(NULL, node, nodeValue->children);
       TREE_DEBUG (node, "DETACH ELEMENT AT NODE");
       Lists.detachElement(NULL, node);
     }
     TREE_DEBUG (node, " FREE NODE-SUBTREE VALUE");
-    /*loop_list(nodeValue->children) {
-      treeNode* child = (treeNode*)it;
-      treeDeleteNodeSubtree(t, child);
-    }*/
     treeDeleteNodeValueRec(t, nodeValue);
-    //free(node);
   }
   TREE_DEBUG (NULL, " DONE REMOVING NODE-SUBTREE EXIT()");
 }

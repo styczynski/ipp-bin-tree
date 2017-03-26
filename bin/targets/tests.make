@@ -1,3 +1,9 @@
+#
+# Testing commands
+#
+# @Piotr Styczyński 2017
+#
+
 TEST_OUT_DIR_T=$(TEST_OUT_DIR)
 TEST_IN_DIR_T=$(TEST_IN_DIR)
 TEST_IN_DIR=$(TEST_DIR)

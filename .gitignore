@@ -32,3 +32,6 @@
 ./test_results/*.err
 test_results
 dist
+
+# JSON GCC linter configs
+./**/.gcc-flags.json

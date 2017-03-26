@@ -1,4 +1,8 @@
-
+#
+# Cleaning commands
+#
+# @Piotr Styczyński 2017
+#
 
 clean: clean-temp
 	$(info <b>Project cleaned. Done</b>)

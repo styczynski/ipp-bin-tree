@@ -25,13 +25,6 @@ typedef struct incrTreeData incrTreeData;
 typedef struct incrTrees incrTrees;
 typedef incrTreeData* incrTree;
 
-/*
-* Structure containing incrTree representation
-*/
-struct incrTreeData {
-  tree t;
-  int lastNodeNo;
-};
 
 /*
 * Interface of incremental trees

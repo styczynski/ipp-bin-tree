@@ -1,8 +1,0 @@
-OK
-IncrTree[lastNodeNo = 1]: Tree: {
-  Node -1 - 00aa17f8: [00aa1828] <00aa1810> | 00000000 {
-    Node 0 - 00aa1860: [00aa1850] <00aa1838> | 00aa17f8 {
-      Node 1 - 00aa18b0 [00aa1878] <00aa1898> | 00aa1860
-    }
-  }
-}

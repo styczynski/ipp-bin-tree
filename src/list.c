@@ -17,6 +17,27 @@
 #include <errno.h>
 #include "list.h"
 
+
+/*
+* Structure representing one element of list
+* It's got two neighbours (may be NULL)
+* Element also contains void* pointer to the actual data.
+*/
+struct listNode {
+  listNode* right;
+  void* value;
+  listNode* left;
+};
+
+/*
+* Root element of the list containing pointers
+* to the two ends of a list
+*/
+struct listRoot {
+  listNode* begin;
+  listNode* end;
+};
+
 /*
 * Null/empty objects - used for memory allocation
 */
@@ -359,6 +380,7 @@ int isListRightSideEnd( listNode* node ) {
 
 /*
 * Append list <src> to the left of <node> in list <tgt>
+* leaving <src> empty.
 * Tgt parameter MUST BE NON-NULL only if <node> is first/last element.
 * Otherwise it may be NULL
 */
@@ -366,18 +388,15 @@ void insertListAt( list tgt, listNode* node, list src ) {
   if(node == NULL) return;
   if(src == NULL) return;
   if((src->begin == NULL) || (src->end == NULL)) {
-    freeList(src);
     return;
   }
   if(node->left == NULL) {
     tgt->begin = src->begin;
-
     src->end->right = node;
     node->left = src->end;
 
     src->begin = NULL;
     src->end = NULL;
-    freeList(src);
     return;
   } else if(node->right == NULL) {
     node->left->right = src->begin;
@@ -387,18 +406,15 @@ void insertListAt( list tgt, listNode* node, list src ) {
 
     src->begin = NULL;
     src->end = NULL;
-    freeList(src);
     return;
   } else {
     node->left->right = src->begin;
     src->begin->left = node->left;
     node->left = src->end;
     src->end->right = node;
-    //freeListRecLeft(&node);
 
     src->begin = NULL;
     src->end = NULL;
-    freeList(src);
     return;
   }
 }
@@ -423,6 +439,42 @@ list splitList( list src, listNode* splitter ) {
     ret->begin->left = NULL;
   }
   return ret;
+}
+
+/*
+* Get next element on the list.
+* Returns NULL if node is the last element.
+*/
+listNode* listNext( listNode* node ) {
+  if(node==NULL) return NULL;
+  return node->right;
+}
+
+/*
+* Get previous element on the list.
+* Returns NULL if node is the last element.
+*/
+listNode* listPrevious( listNode* node ) {
+  if(node==NULL) return NULL;
+  return node->left;
+}
+
+/*
+* Get value of the list element. Returns void pointer to underlying data.
+* Returns NULL if node is NULL.
+*/
+void* listGetValue( listNode* node ) {
+  if(node==NULL) return NULL;
+  return node->value;
+}
+
+/*
+* Sets value of the list element.
+* Does nothing if element is NULL.
+*/
+void listSetValue( listNode* node, void* value ) {
+  if(node==NULL) return;
+  node->value = value;
 }
 
 /*
@@ -453,5 +505,9 @@ const lists Lists = {
   .insertListAt = insertListAt,
   .isListEnd = isListRightSideEnd,
   .isListBegin = isListLeftSideEnd,
-  .splitList = splitList
+  .splitList = splitList,
+  .next = listNext,
+  .previous = listPrevious,
+  .getValue = listGetValue,
+  .setValue = listSetValue
 };

@@ -1,3 +1,11 @@
+#
+# General purpose awesome makefile
+# This is wrapper for build.sh script
+# Usage: type 'make help' to see help.
+#
+#
+# @Piotr Styczyński 2017
+#
 include build.config
 
 ifeq (,$(DEFAULT_TARGET))

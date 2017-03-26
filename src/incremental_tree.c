@@ -17,6 +17,15 @@
 #include <stdio.h>
 
 /*
+* Structure containing incrTree representation
+*/
+struct incrTreeData {
+  tree t;
+  int lastNodeNo;
+};
+
+
+/*
 * Null object for memory allocating purposes
 */
 const incrTreeData nullIncrTreeData = {

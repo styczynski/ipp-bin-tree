@@ -1,4 +1,12 @@
 #!/bin/bash
+#
+# General purpose awesome makefile
+# This script is used to colourize gcc/g++ output
+# and format makefile output.
+#
+#
+# @Piotr Styczyński 2017
+#
 
 while read var assign value; do
   if [[ ${assign} = ':=' ]]; then

@@ -20,13 +20,13 @@
 * Usage:
 *
 *   loop_list(list_object, i) {
-*         void* element = i->value;
+*         void* element = Lists.value(i);
 *         printf("void_ptr = %p\n", i);
 *    }
 *
 */
 #define loop_list(LIST, VAR_NAME) \
-  for(listNode *VAR_NAME = (LIST)->begin; VAR_NAME != NULL; VAR_NAME=(VAR_NAME->right))
+  for(listIterator VAR_NAME = Lists.begin(LIST); VAR_NAME != NULL; VAR_NAME=Lists.next(VAR_NAME))
 
 /*
 * Declare data types needed for lists implementation
@@ -39,6 +39,11 @@ typedef struct listRoot listRoot;
 * Actual list - syntax sugar for writing pointers everywhere
 */
 typedef listRoot* list;
+
+/*
+* List iterator
+*/
+typedef listNode* listIterator;
 
 /*
 * Function of type
@@ -62,7 +67,7 @@ struct lists {
   /*
   * Destroy given list freeing up memory.
   *
-  * WARN: Invalidates listNode* pointers
+  * WARN: Invalidates listIterators
   */
   void (*free)( list );
 
@@ -70,24 +75,24 @@ struct lists {
   * Push element to the front of a given list.
   * Method returns pointer to the newly created list node.
   *
-  * NOTICE: All listNode pointers are valid until used operation does not
+  * NOTICE: All listIterators are valid until used operation does not
   *         keep pointers validity.
   */
-  listNode* (*pushFront)( list l, void* element );
+  listIterator (*pushFront)( list l, void* element );
 
   /*
   * Push element to the end of a given list.
   * Method returns pointer to the newly created list node.
   *
-  * NOTICE: All listNode pointers are valid until used operation does not
+  * NOTICE: All listIterators are valid until used operation does not
   *         keep pointers validity.
   */
-  listNode* (*pushBack)( list l, void* element );
+  listIterator (*pushBack)( list l, void* element );
 
   /*
   * Removes first element of the given list or does nothing if it's empty.
   *
-  * WARN: Invalidates listNode* pointers when elment under pointers
+  * WARN: Invalidates listIterators when elment under pointers
   *       will be popped.
   */
   void (*popFront)( list l );
@@ -95,7 +100,7 @@ struct lists {
   /*
   * Removes last element of the given list or does nothing if it's empty.
   *
-  * WARN: Invalidates listNode* pointers when elment under pointers
+  * WARN: Invalidates listIterators when elment under pointers
   *       will be popped.
   */
   void (*popBack)( list l );
@@ -103,7 +108,7 @@ struct lists {
   /*
   * Clears the entire list.
   *
-  * WARN: Invalidates listNode* pointers to all elements of list
+  * WARN: Invalidates listIterators for all elements of list
   */
   void (*clear)( list l );
 
@@ -179,19 +184,19 @@ struct lists {
   * Get the first element container pointer.
   * If the list is empty then NULL is returned.
   *
-  * NOTICE: All listNode pointers are valid until used operation does not
+  * NOTICE: All listIterators are valid until used operation does not
   *         keep pointers validity.
   */
-  listNode* (*begin)( list l );
+  listIterator (*begin)( list l );
 
   /*
   * Get the last element container pointer.
   * If the list is empty then NULL is returned.
   *
-  * NOTICE: All listNode pointers are valid until used operation does not
+  * NOTICE: All listIterators are valid until used operation does not
   *         keep pointers validity.
   */
-  listNode* (*end)( list l );
+  listIterator (*end)( list l );
 
   /*
   * Removes element from the list using given container pointer.
@@ -201,68 +206,86 @@ struct lists {
   *
   * WARN: Invalidates pointers to the removed elements.
   */
-  void (*detachElement)( list l, listNode* node );
+  void (*detachElement)( list l, listIterator node );
 
   /*
   * Create node that is not attached to anything.
   * This functionality may be used in situations when you need
   * lsit nodes outside actual list.
   *
-  * NOTICE: All listNode pointers are valid until used operation does not
+  * NOTICE: All listIterators are valid until used operation does not
   *         keep pointers validity.
   */
-  listNode* (*newDetachedElement)( );
+  listIterator (*newDetachedElement)( );
 
   /*
   * Checks if given node is the last or first element.
   */
-  int (*isSideElement)( listNode* node );
+  int (*isSideElement)( listIterator node );
 
   /*
-  * Inserts list <source> to the left side of <node> of list <target>.
+  * Inserts list <source> to the left side of <node> of list <target>
+  * leaving <source> empty.
   * Note that <target> MUST BE NON-NULL only when the <node> is first/last
   * element of the list (isSideElement return true).
   * For all other situations it may be NULL
   *
   */
-  void (*insertListAt)( list target, listNode* node, list source );
+  void (*insertListAt)( list target, listIterator node, list source );
 
   /*
   * Checks if given node is the last element
   */
-  int (*isListEnd)(listNode*);
+  int (*isListEnd)(listIterator);
 
   /*
   * Checks if given node is the first element.
   */
-  int (*isListBegin)(listNode*);
+  int (*isListBegin)(listIterator);
 
   /*
   * All elements on the right side of <node> are transferred to the new list
   * that is returned.
   */
-  list (*splitList)( list l, listNode* node );
+  list (*splitList)( list l, listIterator node );
+
+  /*
+  * Get next element on the list.
+  * Returns NULL if node is the last element.
+  *
+  * NOTICE: All listIterators are valid until used operation does not
+  *         keep pointers validity.
+  */
+  listIterator (*next)( listIterator node );
+
+  /*
+  * Get prevous element on the list.
+  * Returns NULL if node is the last element.
+  *
+  * NOTICE: All listIterators are valid until used operation does not
+  *         keep pointers validity.
+  */
+  listIterator (*previous)( listIterator node );
+
+  /*
+  * Get value of the list element. Returns void pointer to underlying data.
+  * Returns NULL if element is NULL.
+  *
+  * NOTICE: All listIterators are valid until used operation does not
+  *         keep pointers validity.
+  */
+  void* (*getValue)( listIterator node );
+
+  /*
+  * Sets value of the list element.
+  * Does nothing if element is NULL.
+  *
+  * NOTICE: All listIterators are valid until used operation does not
+  *         keep pointers validity.
+  */
+  void (*setValue)( listIterator node, void* value );
 };
 
-/*
-* Structure representing one element of list
-* It's got two neighbours (may be NULL)
-* Element also contains void* pointer to the actual data.
-*/
-struct listNode {
-  listNode* right;
-  void* value;
-  listNode* left;
-};
-
-/*
-* Root element of the list containing pointers
-* to the two ends of a list
-*/
-struct listRoot {
-  listNode* begin;
-  listNode* end;
-};
 
 /*
 * Lists interface object

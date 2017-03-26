@@ -88,25 +88,6 @@ struct trees {
 };
 
 /*
-* Structure representing value of tree node
-*/
-struct treeNodeValue {
-  int number;
-  list children;
-  treeNode* parent;
-};
-
-/*
-* Structure representing root node of tree
-*/
-struct treeRoot {
-  treeNode* root;
-  treeNode** refTab;
-  int refTabSize;
-  int size;
-};
-
-/*
 *  Tree interface accessor object
 */
 const trees Trees;
