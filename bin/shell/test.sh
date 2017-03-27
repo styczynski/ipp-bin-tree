@@ -91,6 +91,12 @@ function print_help {
   printf "      [prog_flags] are optional conmmand line argument passed to program <prog>\n"
   printf "      [test_flags] are optional flags for test script\n"
   printf "      All available [test_flags] are:\n"
+  printf "        --ttools <tools> - set additional debug tools\n"
+  printf "           Tools is the coma-separated array of tools names. Tools names can be as the following:\n"
+  printf "               * time - prints time statistic using Unix time command.\n"
+  printf "               * stime - measures time using bash date command (not as precise as time tool).\n"
+  printf "               * vmemcheck - uses valgrind memcheck tools to search for application leaks.\n"
+  printf "               * vmassif - uses valgrind massif and prints peak memory usage.\n"
   printf "        --tscript <script> - set output testing command as <script>\n"
   printf "           Script path is path to the executed script/program.\n"
   printf "           There exists few built-in testing scripts:\n"
@@ -632,7 +638,11 @@ function run_program {
   if [[ $flag_tools_use_vmemcheck = 'true' ]]; then
     { valgrind --tool=memcheck $param_prog $input_prog_flag_acc < $input_file_path > /dev/null ; } 2> ./memcheck.out
     leaksReport=$(sed 's/==.*== //' ./memcheck.out | sed -n -e '/LEAK SUMMARY:/,$p' | sed 's/LEAK SUMMARY://' | head -5)
-    tooling_additional_test_info="${tooling_additional_test_info}Leaks report:\n${leaksReport}\n"
+    if [[ $leaksReport != '' ]]; then
+      tooling_additional_test_info="${tooling_additional_test_info}Leaks detected / Report:\n${leaksReport}\n"
+    else
+      tooling_additional_test_info="${tooling_additional_test_info}No leaks possible.\n"
+    fi
     rm ./memcheck.out
   fi
 
@@ -661,7 +671,6 @@ do
         for tool in $flag_tools
         do
           tool=flag_tools_use_${tool}
-          printf "$tool\n"
           eval $tool=true
         done
         unset IFS
