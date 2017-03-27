@@ -91,19 +91,23 @@ struct lists {
 
   /*
   * Removes first element of the given list or does nothing if it's empty.
+  * Returns data pointer held by the removed element.
+  * If no element was removed (list is empty) NULL is returned.
   *
   * WARN: Invalidates listIterators when elment under pointers
   *       will be popped.
   */
-  void (*popFront)( list l );
+  void* (*popFront)( list l );
 
   /*
   * Removes last element of the given list or does nothing if it's empty.
+  * Returns data pointer held by the removed element.
+  * If no element was removed (list is empty) NULL is returned.
   *
   * WARN: Invalidates listIterators when elment under pointers
   *       will be popped.
   */
-  void (*popBack)( list l );
+  void* (*popBack)( list l );
 
   /*
   * Clears the entire list.

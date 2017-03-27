@@ -123,13 +123,16 @@ listNode* pushBackList(list l, void* value) {
 
 /*
 * Remove the first element of the given list
+* Return data pointer held by the removed element.
+* If list is empty return NULL.
 */
-void popFrontList(list l) {
+void* popFrontList(list l) {
   if(l == NULL) {
-    return;
+    return NULL;
   } else if (l->begin == NULL) {
-    return;
+    return NULL;
   } else {
+    void *val = (l->begin)->value;
     listNode* new_begin = (l->begin)->right;
     if(new_begin != NULL) {
       new_begin->left = NULL;
@@ -138,18 +141,22 @@ void popFrontList(list l) {
     }
     free(l->begin);
     (l->begin) = new_begin;
+    return val;
   }
 }
 
 /*
 * Remove the last element of the given list
+* Return data pointer held by the removed element.
+* If list is empty return NULL.
 */
-void popBackList(list l) {
+void* popBackList(list l) {
   if(l == NULL) {
-    return;
+    return NULL;
   } else if (l->end == NULL) {
-    return;
+    return NULL;
   } else {
+    void* val = (l->end)->value;
     listNode* new_end = (l->end)->left;
     if(new_end != NULL) {
       new_end->right = NULL;
@@ -158,6 +165,7 @@ void popBackList(list l) {
     }
     free(l->end);
     (l->end) = new_end;
+    return val;
   }
 }
 
