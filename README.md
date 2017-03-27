@@ -59,7 +59,8 @@ int main() {                //
                             // 
   int x = 42;               // Set some data to insert to the list.
   int b = 16;               // Note that lists captures only void* pointers to held elements.
-  int c = 8;                // You must store them somewhere else (also free after detaching from list etc.)
+  int c = 8;                // You must store them somewhere else
+                            // (also free after detaching from list etc.)
                             //
   Lists.pushFront(l, &a);   // Push elements to the front of the list
   Lists.pushFront(l, &b);   //
